@@ -1,0 +1,39 @@
+# 忽略操作系统生成的文件
+.DS_Store          # macOS
+Thumbs.db          # Windows
+desktop.ini        # Windows
+
+# 忽略日志文件
+*.log
+
+# 忽略临时文件
+*.tmp
+*.swp
+*.bak
+*.old
+
+# 忽略编译生成的文件
+*.out
+*.class
+*.o
+*.so
+*.dll
+*.exe
+
+# 忽略Node.js项目中的node_modules目录
+node_modules/
+
+# 忽略Python项目中的虚拟环境目录
+venv/
+__pycache__/
+*.pyc
+
+# 忽略Java项目中的编译目录
+target/
+build/
+
+# 忽略IDE生成的文件
+.vscode/
+
+# 数据文件
+data/
