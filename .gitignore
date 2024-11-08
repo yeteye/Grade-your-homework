@@ -33,6 +33,7 @@ target/
 build/
 
 # 忽略IDE生成的文件
+.idea/
 .vscode/
 
 # 数据文件
