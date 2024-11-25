@@ -2,6 +2,8 @@
 
 ## 环境配置
 
+推荐使用python版本3.9
+
 ### 建立hanlp环境并安装hanlp
 ```
 python3.9 -m venv env_a
