@@ -38,3 +38,10 @@ build/
 
 # 数据文件
 data/
+
+# 依赖文件
+myHanlp/
+myPaddle/
+
+# 忽略log文件
+log/

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR 服务</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .output {
+            margin-top: 20px;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .output pre {
+            font-size: 14px;
+            color: #333;
+        }
+        #downloadButton {
+            margin-top: 10px;
+            background-color: #28a745;
+        }
+        #downloadButton:hover {
+            background-color: #218838;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OCR 服务</h1>
+        <form id="ocrForm">
+            <label for="model">选择 OCR 模型：</label>
+            <select id="model">
+                <option value="PaddleOCR">PaddleOCR</option>
+                <option value="Tesseract">Tesseract</option>
+            </select>
+
+            <label for="language">选择语言：</label>
+            <select id="language">
+                <option value="中文">中文</option>
+                <option value="英文">英文</option>
+            </select>
+
+            <label for="inputType">选择输入类型：</label>
+            <select id="inputType">
+                <option value="单个图片">单个图片</option>
+                <option value="文件夹">文件夹</option>
+            </select>
+
+            <label for="inputPath">输入路径：</label>
+            <input type="text" id="inputPath" placeholder="手动输入路径或点击下方按钮选择">
+            <button type="button" id="choosePathButton">选择路径</button>
+
+            <button type="button" id="submitButton">开始处理</button>
+        </form>
+
+        <div class="output hidden" id="output">
+            <h3>处理结果：</h3>
+            <pre id="outputContent">等待处理...</pre>
+            <button id="downloadButton" class="hidden">下载结果</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("choosePathButton").addEventListener("click", () => {
+            // 打开文件选择器
+            window.showOpenFilePicker ? 
+                alert("当前浏览器暂不支持直接选择路径，请手动输入。") : 
+                alert("实现文件或文件夹选择逻辑！");
+        });
+
+        document.getElementById("submitButton").addEventListener("click", async () => {
+            const model = document.getElementById("model").value;
+            const language = document.getElementById("language").value;
+            const inputType = document.getElementById("inputType").value;
+            const inputPath = document.getElementById("inputPath").value;
+
+            if (!inputPath) {
+                alert("请输入或选择输入路径！");
+                return;
+            }
+
+            const payload = {
+                model: model,
+                language: language,
+                inputType: inputType,
+                inputPath: inputPath,
+            };
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/ocr", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await response.json();
+                const outputDiv = document.getElementById("output");
+                const outputContent = document.getElementById("outputContent");
+                const downloadButton = document.getElementById("downloadButton");
+
+                if (response.ok) {
+                    outputDiv.classList.remove("hidden");
+                    outputContent.innerText = 
+                        `处理成功！\n识别结果（部分显示）：\n` +
+                        JSON.stringify(data.results.slice(0, 3), null, 2) + 
+                        `\n\n完整结果已保存到服务器默认路径。`;
+
+                    downloadButton.classList.remove("hidden");
+                    downloadButton.onclick = () => {
+                        const link = document.createElement("a");
+                        link.href = `http://127.0.0.1:5000/download?file=${encodeURIComponent(data.outputPath)}`;
+                        link.download = "ocr_results.csv";
+                        link.click();
+                    };
+                } else {
+                    outputDiv.classList.remove("hidden");
+                    outputContent.innerText = `处理失败：${data.message}`;
+                    downloadButton.classList.add("hidden");
+                }
+            } catch (error) {
+                document.getElementById("outputContent").innerText = `请求出错：${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
