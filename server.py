@@ -17,9 +17,11 @@ app = Flask(__name__)
 CORS(app)  # 允许跨域请求
 
 python_path = './env/MyHanlp/Scripts/python3.9.exe' 
+pytesseract_path = r'D:/Program Files/Tesseract-OCR/tesseract.exe'
+txt_compare_path = './txt_compare/text_comparer.py'
 
 # 配置 Tesseract 路径（根据实际安装路径修改）
-pytesseract.pytesseract.tesseract_cmd = r'D:/Program Files/Tesseract-OCR/tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = pytesseract_path
 
 # 默认输出路径
 OUTPUT_DIR = 'output'
@@ -113,7 +115,7 @@ def compare_texts():
 
     # 使用 subprocess 调用外部脚本进行文本比较
     result = subprocess.run(
-        [ python_path, 'text_comparer.py', work_content, answer_content],
+        [ python_path, txt_compare_path, work_content, answer_content],
         capture_output=True,
         text=True
     )

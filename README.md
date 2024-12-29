@@ -39,3 +39,10 @@ https://data.vision.ee.ethz.ch/cvl/DIV2K/
 ## 使用说明
 
 ### 运行run.bat
+
+运行前注意修改必要路径（server.py）
+```
+python_path = './env/MyHanlp/Scripts/python3.9.exe' 
+pytesseract_path = r'D:/Program Files/Tesseract-OCR/tesseract.exe'
+txt_compare_path = './txt_compare/text_comparer.py'
+```
