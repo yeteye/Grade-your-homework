@@ -96,6 +96,11 @@ def download_file():
         return send_from_directory(directory, filename, as_attachment=True)
     except Exception as e:
         return jsonify({"message": f"下载出错: {str(e)}"}), 500
+    
+@app.route('/')
+def home():
+    return "欢迎使用 OCR 服务！"
+
 
 if __name__ == '__main__':
     app.run(debug=True)

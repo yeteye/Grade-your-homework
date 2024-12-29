@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OCR and Semantic Matching</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.image-uploader {
+    margin-bottom: 20px;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-top: 10px;
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+    margin-top: 10px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>OCR and Semantic Matching</h1>
+
+    <div class="image-uploader">
+        <label for="image-upload1">选择图片1:</label>
+        <input type="file" id="image-upload1" accept="image/*">
+        <img id="preview1" src="" alt="Preview" style="display:none;">
+        <textarea id="ocr-result1" placeholder="OCR结果将显示在这里..." readonly></textarea>
+    </div>
+
+    <div class="image-uploader">
+        <label for="image-upload2">选择图片2:</label>
+        <input type="file" id="image-upload2" accept="image/*">
+        <img id="preview2" src="" alt="Preview" style="display:none;">
+        <textarea id="ocr-result2" placeholder="OCR结果将显示在这里..." readonly></textarea>
+    </div>
+
+    <button id="semantic-match-btn">语义匹配</button>
+    <p id="similarity-score"></p>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Helper function to read file and convert it to a base64 string
+    function readFile(file, callback) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            callback(e.target.result);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Function to handle image upload and preview
+    function handleImageUpload(inputId, previewId, resultId) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        const result = document.getElementById(resultId);
+
+        input.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                readFile(file, function(base64) {
+                    preview.src = base64;
+                    preview.style.display = 'block';
+                    performOcr(file, result);
+                });
+            }
+        });
+    }
+
+    // Function to perform OCR on the uploaded image
+    async function performOcr(file, resultElement) {
+        const formData = new FormData();
+        formData.append('model', 'PaddleOCR'); // or 'Tesseract'
+        formData.append('language', '中文'); // or '英文'
+        formData.append('inputType', '单个图片');
+        formData.append('file', file); // Correctly append the file
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/ocr', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                resultElement.value = data.results[0].content;
+            } else {
+                console.error('OCR failed:', await response.text());
+            }
+        } catch (error) {
+            console.error('Error during OCR:', error);
+        }
+    }
+
+    // Handle semantic matching
+    document.getElementById('semantic-match-btn').addEventListener('click', async () => {
+        const textA = document.getElementById('ocr-result1').value;
+        const textB = document.getElementById('ocr-result2').value;
+
+        if (!textA || !textB) {
+            alert('请先上传图片并获取OCR结果！');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/Semantic_matching', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ texta: textA, textb: textB })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('similarity-score').textContent = `相似度: ${data.similarity}`;
+            } else {
+                console.error('Semantic matching failed:', await response.text());
+            }
+        } catch (error) {
+            console.error('Error during semantic matching:', error);
+        }
+    });
+
+    // Initialize image upload handlers
+    handleImageUpload('image-upload1', 'preview1', 'ocr-result1');
+    handleImageUpload('image-upload2', 'preview2', 'ocr-result2');
+
+});
+</script>
+</body>
+</html>
