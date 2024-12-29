@@ -1,4 +1,4 @@
-import hanlp
+import hanlp # type: ignore
 import json
 import csv
 
@@ -124,7 +124,7 @@ output_file = 'semantic_similarity_results.csv'
 num_entries = 1000
 
 # 创建实例并计算相似度
-calculator = SemanticSimilarityCalculator(input_file, output_file, num_entries=num_entries, similarity_threshold=0.4)
+calculator = SemanticSimilarityCalculator(input_file, output_file, num_entries=num_entries, similarity_threshold=0.3)
 calculator.calculate_similarity_and_save()
 
 # 计算并打印准确率及错误比例

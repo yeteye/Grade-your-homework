@@ -2,7 +2,7 @@
 
 ## 环境配置
 
-推荐使用python版本3.9
+推荐使用python版本3.9,由于hanlp和flask、paddleOCR之间存在版本冲突，需要用不同环境隔离
 
 ### 建立hanlp环境并安装hanlp
 ```
