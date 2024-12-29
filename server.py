@@ -57,6 +57,7 @@ def ocr_service():
             return jsonify({"message": "无效的输入类型！"}), 400
 
         # 保存结果到 CSV 文件
+        print(results)
         output_file_path = os.path.join(OUTPUT_DIR, OUTPUT_FILE)
         save_to_csv(output_file_path, results)
 
