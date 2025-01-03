@@ -1,1 +1,2 @@
-env\TxtCapturer\Scripts\python3.9.exe d:/86199/All_File/Programs/Code_VSCode/Score/server.py
+env\TxtCapturer\Scripts\python3.9.exe ./server.py
+start http://127.0.0.1:5000/
