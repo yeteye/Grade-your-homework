@@ -2,6 +2,7 @@ import os
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from paddleocr import PaddleOCR
+from reference import calculate_similarity
 from PIL import Image
 import pytesseract
 import csv
@@ -19,6 +20,14 @@ OUTPUT_FILE = 'ocr_results.csv'
 # 确保输出目录存在
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+@app.route('/Semantic_matching',methods=['POST'])
+def semantic_matching():
+    data = request.json
+    texta = data.get('texta')
+    textb = data.get('textb')
+    similarity_1_2 = similarity_model((text1, text2))
+
+
 @app.route('/ocr', methods=['POST'])
 def ocr_service():
     data = request.json
@@ -26,9 +35,11 @@ def ocr_service():
     language = data.get('language')
     input_type = data.get('inputType')
     input_path = data.get('inputPath')
+    print(data)
 
     # 验证路径是否存在
     if not os.path.exists(input_path):
+        print("指定的路径不存在！")
         return jsonify({"message": "指定的路径不存在！"}), 400
 
     # 根据模型和语言初始化
