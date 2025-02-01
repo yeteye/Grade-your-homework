@@ -9,7 +9,7 @@ from flask_cors import CORS
 from paddleocr import PaddleOCR
 from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify, send_from_directory, render_template
-
+from reference import calculate_similarity
 # 设置日志
 logging.basicConfig(level=logging.INFO)
 
@@ -114,17 +114,19 @@ def compare_texts():
         return jsonify({"message": "请输入作业内容和参考答案内容"}), 400
 
     # 使用 subprocess 调用外部脚本进行文本比较
-    result = subprocess.run(
-        [ python_path, txt_compare_path, work_content, answer_content],
-        capture_output=True,
-        text=True
-    )
-
-    if result.returncode == 0:
-        similarity = float(result.stdout.strip())
-        return jsonify({"similarity": similarity * 100}), 200
-    else:
-        return jsonify({"message": "文本比较出错", "error": result.stderr}), 500
+    # result = subprocess.run(
+    #     [ python_path, txt_compare_path, work_content, answer_content],
+    #     capture_output=True,
+    #     text=True
+    # )
+    result=calculate_similarity(work_content,answer_content)
+    print(result)
+    return jsonify({"similarity": result*100}), 200
+    # if result.returncode == 0:
+    #     similarity = float(result.stdout.strip())
+    #     return jsonify({"similarity": similarity * 100}), 200
+    # else:
+    #     return jsonify({"message": "文本比较出错", "error": result.stderr}), 500
 
 @app.route('/download', methods=['GET'])
 def download_file():

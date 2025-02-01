@@ -477,8 +477,8 @@ model_path = "checkpoint/model_best.pdparams"
 runner.load_model(model_path)
 def calculate_similarity(text_a, text_b):
 
-    text_a = "今天的天气如何？"
-    text_b = "今天天气怎么样？"
+    # text_a = "今天的天气如何？"
+    # text_b = "今天天气怎么样？"
 
     cls_id = word2id_dict["[CLS]"]
 
