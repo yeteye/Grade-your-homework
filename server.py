@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
 CORS(app)  # 允许跨域请求
 
-python_path = './env/MyHanlp/Scripts/python3.9.exe' 
+python_path = './env/MyHanlp/Scripts/python.exe' 
 pytesseract_path = r'D:/Program Files/Tesseract-OCR/tesseract.exe'
 txt_compare_path = './txt_compare/text_comparer.py'
 
