@@ -10,6 +10,8 @@ from paddleocr import PaddleOCR
 from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify, send_from_directory, render_template
 from reference import calculate_similarity
+from grade import get_points  # 导入新增的deepseek评分函数
+
 # 设置日志
 logging.basicConfig(level=logging.INFO)
 
@@ -45,6 +47,7 @@ def allowed_file(filename):
 @app.route('/')
 def home():
     return render_template('index.html')  # 渲染 templates 目录下的 index.html 页面
+
 @app.route('/ocr', methods=['POST'])
 def ocr_service():
     if 'file1' not in request.files or 'file2' not in request.files:
@@ -102,82 +105,37 @@ def ocr_service():
 
     return jsonify({"message": "上传文件失败"}), 400
 
-
-
 @app.route('/compare_texts', methods=['POST'])
 def compare_texts():
     data = request.json
     work_content = data.get('workContent')
     answer_content = data.get('answerContent')
+    use_deepseek = data.get('useDeepseek', False)  # 获取是否使用deepseek增强评分
 
     if not work_content or not answer_content:
         return jsonify({"message": "请输入作业内容和参考答案内容"}), 400
 
-    # 使用 subprocess 调用外部脚本进行文本比较
-    # result = subprocess.run(
-    #     [ python_path, txt_compare_path, work_content, answer_content],
-    #     capture_output=True,
-    #     text=True
-    # )
-    result=calculate_similarity(work_content,answer_content)
-    print(result)
-    return jsonify({"similarity": result*100}), 200
-    # if result.returncode == 0:
-    #     similarity = float(result.stdout.strip())
-    #     return jsonify({"similarity": similarity * 100}), 200
-    # else:
-    #     return jsonify({"message": "文本比较出错", "error": result.stderr}), 500
-
-@app.route('/download', methods=['GET'])
-def download_file():
-    """提供文件下载接口"""
-    file_path = request.args.get('file')
-    if not file_path or not os.path.exists(file_path):
-        return jsonify({"message": "指定的文件不存在！"}), 400
-
-    directory, filename = os.path.split(file_path)
-    try:
-        return send_from_directory(directory, filename, as_attachment=True)
-    except Exception as e:
-        logging.error(f"下载出错: {str(e)}")
-        return jsonify({"message": f"下载出错: {str(e)}"}), 500
-
-# def process_image(file_path, model, ocr, language):
-#     """处理单张图片"""
-#     try:
-#         if model == "PaddleOCR":
-#             result = ocr.ocr(file_path, cls=True)
-#             content = '\n'.join([str(line[1][0]) for line in result[0]])
-#         elif model == "Tesseract":
-#             image = Image.open(file_path)
-#             content = pytesseract.image_to_string(image, lang='chi_sim' if language == "中文" else 'eng')
-#         else:
-#             content = "未识别的模型"
-#         return {"image_path": file_path, "content": content}
-#     except Exception as e:
-#         logging.error(f"处理图片时出错 {file_path}: {str(e)}")
-#         return {"image_path": file_path, "content": "处理出错"}
-
-# def process_directory(input_path, model, ocr, language):
-#     """处理目录中的所有文件"""
-#     results = []
-#     for filename in os.listdir(input_path):
-#         file_path = os.path.join(input_path, filename)
-#         if os.path.isfile(file_path) and allowed_file(filename):
-#             results.append(process_image(file_path, model, ocr, language))
-#     return results
-
-# def save_to_csv(output_file_path, results):
-#     """保存 OCR 结果到 CSV 文件"""
-#     try:
-#         with open(output_file_path, mode='w', newline='', encoding='utf-8') as file:
-#             writer = csv.writer(file)
-#             writer.writerow(["Image Path", "Content"])
-#             for result in results:
-#                 writer.writerow([result["image_path"], result["content"]])
-#     except Exception as e:
-#         logging.error(f"保存 CSV 时出错: {str(e)}")
-
-
+    # 使用原方法计算相似度
+    base_similarity = calculate_similarity(work_content, answer_content)
+    
+    # 如果启用deepseek增强评分
+    if use_deepseek:
+        try:
+            # 使用deepseek进行评分
+            deepseek_score = get_points(answer_content, work_content)
+            
+            # 加权平均（这里可以调整权重）
+            final_similarity = (base_similarity * 0.3) + (deepseek_score * 0.7)
+            logging.info(f"基础相似度: {base_similarity}, Deepseek评分: {deepseek_score}, 最终评分: {final_similarity}")
+            
+            return jsonify({"similarity": final_similarity * 100}), 200
+        except Exception as e:
+            logging.error(f"Deepseek评分出错: {str(e)}")
+            # 出错时返回基础评分
+            return jsonify({"similarity": base_similarity * 100}), 200
+    else:
+        # 只使用原评分方法
+        return jsonify({"similarity": base_similarity * 100}), 200
+    
 if __name__ == '__main__':
     app.run(debug=True)
