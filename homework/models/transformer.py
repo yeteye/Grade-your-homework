@@ -1,102 +1,14 @@
-from math import exp
-
-from utilss.data import load_vocab,load_lcqmc_data
-
-train_data, dev_data, test_data=load_lcqmc_data('lcqmc')
-# 加载词表
-word2id_dict = load_vocab()
-
-from paddle.io import Dataset
-
-class LCQMCDataset(Dataset):
-    def __init__(self, data, word2id_dict):
-        # 词表
-        self.word2id_dict = word2id_dict
-        # 数据
-        self.examples = data
-        # ['CLS']的id，占位符
-        self.cls_id = self.word2id_dict['[CLS]']
-        # ['SEP']的id，句子的分隔
-        self.sep_id = self.word2id_dict['[SEP]']
-
-    def __getitem__(self, idx):
-        # 返回单条样本
-        example = self.examples[idx]
-        text, segment, label = self.words_to_id(example)
-        return text, segment, label
-
-    def __len__(self):
-        # 返回样本的个数
-        return len(self.examples)
-
-    def words_to_id(self, example):
-        text_a, text_b, label = example
-        # text_a 转换成id的形式
-        input_ids_a = [self.word2id_dict[item] if item in self.word2id_dict else self.word2id_dict['[UNK]'] for item in text_a]
-        # text_b 转换成id的形式
-        input_ids_b = [self.word2id_dict[item] if item in self.word2id_dict else self.word2id_dict['[UNK]'] for item in text_b]
-        # 加入[CLS],[SEP]
-        input_ids = [self.cls_id]+ input_ids_a + [self.sep_id] + input_ids_b + [self.sep_id]
-        # 对句子text_a,text_b做id的区分，进行的分隔
-        segment_ids = [0]*(len(input_ids_a)+2)+[1]*(len(input_ids_b)+1)
-        return input_ids, segment_ids, int(label)
-
-    @property
-    def label_list(self):
-        # 0表示不相似，1表示相似
-        return ['0', '1']
-
-# # 加载训练集
-# train_dataset = LCQMCDataset(train_data,word2id_dict)
-# # 加载验证集
-# dev_dataset = LCQMCDataset(dev_data,word2id_dict)
-# # 加载测试集
-# test_dataset = LCQMCDataset(test_data,word2id_dict)
-#
-# from paddle.io import DataLoader
-# import paddle
-
-def collate_fn(batch_data, pad_val=0, max_seq_len=512):
-    input_ids, segment_ids, labels = [], [], []
-    max_len = 0
-    # print(batch_data)
-    for example in batch_data:
-        input_id, segment_id, label = example
-        # 对数据序列进行截断
-        input_ids.append(input_id[:max_seq_len])
-        segment_ids.append(segment_id[:max_seq_len])
-        labels.append(label)
-        # 保存序列最大长度
-        max_len = max(max_len, len(input_id))
-    # 对数据序列进行填充至最大长度
-    for i in range(len(labels)):
-        input_ids[i] = input_ids[i]+[pad_val] * (max_len - len(input_ids[i]))
-        segment_ids[i] = segment_ids[i]+[pad_val] * (max_len - len(segment_ids[i]))
-    return (
-        paddle.to_tensor(input_ids),
-        paddle.to_tensor(segment_ids),
-    ), paddle.to_tensor(labels)
-
-# batch_size = 32
-# # 构建训练集,验证集，测试集的dataloader
-# train_loader = DataLoader(
-#     train_dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False
-# )
-# dev_loader = DataLoader(
-#     dev_dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False
-# )
-# test_loader = DataLoader(
-#     test_dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False
-# )
-
-# # 打印输出一条mini-batch的数据
-# for idx, item in enumerate(train_loader):
-#     if idx == 0:
-#         # print(item)
-#         break
-#
-# import paddle
+"""Original local Transformer architecture, with lazy CPU-only inference loading."""
+from functools import lru_cache
+from pathlib import Path
+import os
+import numpy as np
+import paddle
 import paddle.nn as nn
+import paddle.nn.functional as F
+
+ROOT = Path(__file__).resolve().parents[2]
+
 
 class WordEmbedding(nn.Layer):
     def __init__(self, vocab_size, emb_size, padding_idx=0):
@@ -112,15 +24,6 @@ class WordEmbedding(nn.Layer):
         word_emb = self.emb_size ** 0.5 * self.word_embedding(word)
         return word_emb
 
-# paddle.seed(2021)
-# # 构造一个输入
-# X = paddle.to_tensor([1, 0, 2])
-# # 表示构造的输入编码的词汇表的大小是10，每个词的维度是4
-# word_embed = WordEmbedding(10, 4)
-# print("输入编码为： {}".format(X.numpy()))
-# word_out = word_embed(X)
-# print("输出为： {}".format(word_out.numpy()))
-
 class SegmentEmbedding(nn.Layer):
     def __init__(self, vocab_size, emb_size):
         super(SegmentEmbedding, self).__init__()
@@ -135,18 +38,6 @@ class SegmentEmbedding(nn.Layer):
         seg_embedding = self.seg_embedding(word)
         return seg_embedding
 
-# paddle.seed(2021)
-# # 构造一个输入,0表示第0句的token，1表示第1句的token
-# X = paddle.to_tensor([0, 0, 1, 1])
-# word_embed = SegmentEmbedding(2, 4)
-# print("输入编码为： {}".format(X.numpy()))
-# word_out = word_embed(X)
-# print("输出为： {}".format(word_out.numpy()))
-
-import numpy as np
-import paddle
-
-# position_size 为句子划分成字符或者词的长度，hidden_size为词向量的维度。
 def get_sinusoid_encoding(position_size, hidden_size):
     """位置编码 """
 
@@ -167,12 +58,6 @@ def get_sinusoid_encoding(position_size, hidden_size):
     # position_size × hidden_size  得到每一个词的位置向量
     return sinusoid.astype("float32")
 
-# paddle.seed(2021)
-# position_size = 4
-# hidden_size = 3
-# encoding_vec=get_sinusoid_encoding(position_size, hidden_size)
-# print("位置编码的输出为：{}".format(encoding_vec))
-
 class PositionalEmbedding(nn.Layer):
     def __init__(self, max_length,emb_size):
         super(PositionalEmbedding, self).__init__()
@@ -190,33 +75,6 @@ class PositionalEmbedding(nn.Layer):
         # 关闭位置编码的梯度更新
         pos_emb.stop_gradient = True
         return pos_emb
-
-# paddle.seed(2021)
-# out = paddle.randint(low=0, high=5, shape=[3])
-# print('输入向量为：{}'.format(out.numpy()))
-# pos_embed=PositionalEmbedding(4,5)
-# pos_out=pos_embed(out)
-# print('位置编码的输出为： {}'.format(pos_out.numpy()))
-
-import matplotlib.pyplot as plt
-
-def plot_curve(size,y):
-    plt.figure(figsize=(15, 5))
-    plt.plot(np.arange(size), y[0, :, 4:5].numpy(),color='#E20079',linestyle='-')
-    plt.plot(np.arange(size), y[0, :, 5:6].numpy(),color='#8E004D',linestyle='--')
-    plt.plot(np.arange(size), y[0, :, 6:7].numpy(),color='#3D3D3F',linestyle='-.')
-    plt.legend(["dim %d"%p for p in [4,5,6]], fontsize='large')
-    plt.savefig('att-vis2.pdf')
-
-# model = PositionalEmbedding(emb_size=20, max_length=5000)
-# # 生成0~99这100个数，表示0~99这100个位置
-# size = 100
-# X= paddle.arange((size)).reshape([1,size])
-# # 对这100个位置进行编码，得到每个位置的向量表示
-# # y: [1,100,20]
-# y = model(X)
-# # 把这100个位置的第4，5，6列的数据可视化出来
-# plot_curve(size,y)
 
 class TransformerEmbeddings(nn.Layer):
     """
@@ -264,8 +122,6 @@ class TransformerEmbeddings(nn.Layer):
         # Dropout
         embeddings = self.dropout(embeddings)
         return embeddings
-
-import paddle.nn as nn
 
 class AddNorm(nn.Layer):
     """加与规范化"""
@@ -428,85 +284,28 @@ class Model_Transformer(nn.Layer):
     def attention_weights(self):
         return self._attention_weights
 
-
-from nndl import Accuracy, RunnerV3
-import os
-import paddle.nn.functional as F
-
-
-paddle.seed(2021)
-heads_num = 4
-epochs = 20
-vocab_size=21128
-num_classes= 2
-padding_idx=word2id_dict['[PAD]']
-# 注意力多头的数目
-# 交叉熵损失
-criterion = nn.CrossEntropyLoss()
-# 评估的时候采用准确率指标
-metric = Accuracy()
-# Transformer的分类模型
-model = Model_Transformer(
-    vocab_size=vocab_size,
-    n_block=1,
-    num_classes=num_classes,
-    heads_num=heads_num,
-    padding_idx=padding_idx,
-)
-
-# 排除所有的偏置和LayerNorm的参数
-decay_params = [
-    p.name for n, p in model.named_parameters()
-    if not any(nd in n for nd in ["bias", "norm"])
-]
-
-# 定义 Optimizer
-optimizer = paddle.optimizer.AdamW(
-    learning_rate=5E-5,
-    parameters=model.parameters(),
-    weight_decay=0.0,
-    apply_decay_param_fun=lambda x: x in decay_params)
-
-runner = RunnerV3(model, optimizer, criterion, metric)
+@lru_cache(maxsize=1)
+def load_model():
+    vocab_path = ROOT / 'models' / 'transformer' / 'vocab.txt'
+    vocabulary = {line.strip(): i for i, line in enumerate(vocab_path.read_text(encoding='utf-8').splitlines())}
+    model = Model_Transformer(vocab_size=len(vocabulary), n_block=1, num_classes=2,
+                              heads_num=4, padding_idx=vocabulary['[PAD]'])
+    path = Path(os.environ.get('HOMEWORK_MODEL_PATH', ROOT / 'models' / 'transformer' / 'model_best.pdparams'))
+    model.set_state_dict(paddle.load(str(path)))
+    model.eval()
+    return model, vocabulary
 
 
-
-
-
-model_path = "checkpoint/model_best.pdparams"
-runner.load_model(model_path)
 def calculate_similarity(text_a, text_b):
-
-    # text_a = "今天的天气如何？"
-    # text_b = "今天天气怎么样？"
-
-    cls_id = word2id_dict["[CLS]"]
-
-    sep_id = word2id_dict["[SEP]"]
-    # text_a转换成id的形式
-    input_ids_a = [
-        word2id_dict[item] if item in word2id_dict else word2id_dict["[UNK]"]
-        for item in text_a
-    ]
-    # text_b转换成id的形式
-    input_ids_b = [
-        word2id_dict[item] if item in word2id_dict else word2id_dict["[UNK]"]
-        for item in text_b
-    ]
-    # 两个句子拼接成id的形式
-    input_ids = [cls_id] + input_ids_a + [sep_id] + input_ids_b + [sep_id]
-    # 分段id的形式
-    segment_ids = [0] * (len(input_ids_a) + 2) + [1] * (len(input_ids_b) + 1)
-    # 转换成Tensor张量
-    input_ids = paddle.to_tensor([input_ids])
-    segment_ids = paddle.to_tensor([segment_ids])
-    inputs = [input_ids, segment_ids]
-    # 模型预测
-
-    logits = runner.predict(inputs)
-    numpy_array= logits.numpy()
-    false_num=numpy_array[0][0]
-    true_num=numpy_array[0][1]
-    return exp(true_num)/(exp(true_num)+exp(false_num))
-
-
+    if not isinstance(text_a, str) or not isinstance(text_b, str) or not text_a.strip() or not text_b.strip():
+        raise ValueError('Both texts must be nonempty strings')
+    if len(text_a) + len(text_b) + 3 > 512:
+        raise ValueError('Combined text exceeds the 512-token model capacity')
+    model, vocabulary = load_model()
+    a = [vocabulary.get(c, vocabulary['[UNK]']) for c in text_a]
+    b = [vocabulary.get(c, vocabulary['[UNK]']) for c in text_b]
+    ids = [vocabulary['[CLS]']] + a + [vocabulary['[SEP]']] + b + [vocabulary['[SEP]']]
+    segments = [0] * (len(a) + 2) + [1] * (len(b) + 1)
+    with paddle.no_grad():
+        logits = model([paddle.to_tensor([ids], dtype='int64'), paddle.to_tensor([segments], dtype='int64')])
+        return float(F.softmax(logits, axis=-1).numpy()[0][1])
