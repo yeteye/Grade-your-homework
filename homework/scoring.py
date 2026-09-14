@@ -1,19 +1,14 @@
 """Deterministic scoring and optional model orchestration, independent of Flask."""
 import threading
-import unicodedata
 from collections import Counter
 from difflib import SequenceMatcher
 from math import isfinite
 
 from .ai_grader import get_points, GradingUnavailable
+from .normalization import normalize
 from .validation import text, options, rubric, ValidationError
 
 _model_lock = threading.Lock()
-
-
-def normalize(value):
-    value = unicodedata.normalize('NFKC', value).casefold()
-    return ''.join(c for c in value if c.isalnum())
 
 
 def lexical_similarity(answer, reference):
