@@ -25,11 +25,13 @@ class DefectCases(ApiCase):
     def test_a021_invalid_model_probability_cannot_be_hidden_by_rubric(self):
         """Validate the model's probability before mixing with a rubric."""
         fake = types.ModuleType('homework.models.transformer')
-        fake.calculate_similarity = lambda work, answer: 2.0
         with patch.dict(sys.modules, {'homework.models.transformer': fake}):
-            self.assert_rejected_without_record(expected=503, engine='transformer',
-                workContent='A', answerContent='AB',
-                rubric=[{'keyword': 'Z', 'weight': 1}])
+            for value in (-0.1, 2.0, float('nan'), float('inf')):
+                with self.subTest(model_output=repr(value)):
+                    fake.calculate_similarity = lambda work, answer, output=value: output
+                    self.assert_rejected_without_record(expected=503, engine='transformer',
+                        workContent='A', answerContent='AB',
+                        rubric=[{'keyword': 'Z', 'weight': 1}])
 
     def test_a022_giant_ai_response_keeps_local_score(self):
         """An invalid cloud response should trigger the documented local fallback."""
