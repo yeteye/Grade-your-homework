@@ -1,0 +1,26 @@
+test_explicit_tesseract_path_is_not_silently_replaced (test_ocr_configuration.OcrConfigurationChecks.test_explicit_tesseract_path_is_not_silently_replaced) ... ok
+test_local_runtime_and_language_detection_with_spaces (test_ocr_configuration.OcrConfigurationChecks.test_local_runtime_and_language_detection_with_spaces) ... ok
+test_missing_model_files_do_not_report_ready (test_ocr_configuration.OcrConfigurationChecks.test_missing_model_files_do_not_report_ready) ... ok
+test_ai_failure_keeps_base_score (test_regressions.RegressionChecks.test_ai_failure_keeps_base_score) ... ok
+test_ai_score_validation (test_regressions.RegressionChecks.test_ai_score_validation) ... ok
+test_batch_all_or_nothing (test_regressions.RegressionChecks.test_batch_all_or_nothing) ... ok
+test_csv_formula_and_html_are_escaped (test_regressions.RegressionChecks.test_csv_formula_and_html_are_escaped) ... ok
+test_filter_and_invalid_pagination (test_regressions.RegressionChecks.test_filter_and_invalid_pagination) ... ok
+test_invalid_image_fails_before_engine_load (test_regressions.RegressionChecks.test_invalid_image_fails_before_engine_load) ... ok
+test_long_model_input_rejected_before_loading (test_regressions.RegressionChecks.test_long_model_input_rejected_before_loading) ... ok
+test_normalization (test_regressions.RegressionChecks.test_normalization) ... ok
+test_ocr_failure_is_json_and_cleans_files (test_regressions.RegressionChecks.test_ocr_failure_is_json_and_cleans_files) ... ok
+test_parameter_validation (test_regressions.RegressionChecks.test_parameter_validation) ... ok
+test_path_name_is_never_used_for_writing (test_regressions.RegressionChecks.test_path_name_is_never_used_for_writing) ... ok
+test_persist_and_export_actual_result (test_regressions.RegressionChecks.test_persist_and_export_actual_result) ... ok
+test_same_name_images_are_isolated_and_cleaned (test_regressions.RegressionChecks.test_same_name_images_are_isolated_and_cleaned) ... ok
+test_same_origin_guard (test_regressions.RegressionChecks.test_same_origin_guard) ... ok
+test_template_and_settings_persist_across_app_restart (test_regressions.RegressionChecks.test_template_and_settings_persist_across_app_restart) ... ok
+test_classification_denominators (test_tools.ToolChecks.test_classification_denominators) ... ok
+test_otsu_preserves_black_text_on_white (test_tools.ToolChecks.test_otsu_preserves_black_text_on_white) ... ok
+test_preprocessing_validation_and_constant_image (test_tools.ToolChecks.test_preprocessing_validation_and_constant_image) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 1.134s
+
+OK
