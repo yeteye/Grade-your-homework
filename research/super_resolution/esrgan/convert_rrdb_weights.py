@@ -1,9 +1,17 @@
 import os
 import torch
-import RRDBNet_arch as arch
+import rrdb_architecture as arch
 
-pretrained_net = torch.load('./models/RRDB_ESRGAN_x4.pth')
-save_path = './models/RRDB_ESRGAN_x4.pth'
+import argparse
+from pathlib import Path
+parser = argparse.ArgumentParser(description='Convert legacy RRDB weights without overwriting the source.')
+parser.add_argument('input', type=Path)
+parser.add_argument('output', type=Path)
+args = parser.parse_args()
+if args.output.exists() or args.input.resolve() == args.output.resolve():
+    parser.error('Choose a new output filename.')
+pretrained_net = torch.load(args.input, map_location='cpu', weights_only=True)
+save_path = args.output
 
 crt_model = arch.RRDBNet(3, 3, 64, 23, gc=32)
 crt_net = crt_model.state_dict()
