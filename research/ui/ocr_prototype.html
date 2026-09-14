@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OCR 服务</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f4f4f9;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      label {
+        font-weight: bold;
+        margin-top: 10px;
+        display: block;
+        margin-bottom: 5px;
+      }
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+      button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      .output {
+        margin-top: 30px;
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
+        display: none;
+      }
+      .output pre {
+        font-size: 14px;
+        color: #333;
+        margin: 0;
+      }
+      #downloadButton {
+        background-color: #28a745;
+        margin-top: 15px;
+      }
+      #downloadButton:hover {
+        background-color: #218838;
+      }
+      .path-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .input-boxs {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .input-box {
+        flex: 1;
+      }
+      .input-box input {
+        width: calc(100% - 90px); /* Allow room for button */
+      }
+      .path-box button {
+        width: 80px;
+      }
+      .hidden {
+        display: none;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .img-show {
+        width: 100%;
+        height: auto;
+      }
+      .download-box {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        box-sizing: border-box;
+        resize: vertical; /* 可选，允许垂直调整大小 */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>作业批改服务</h1>
+      <form id="ocrForm">
+        <div class="form-group">
+          <label for="model">选择 OCR 模型：</label>
+          <select id="model">
+            <option value="PaddleOCR">PaddleOCR</option>
+            <option value="Tesseract">Tesseract</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="language">选择语言：</label>
+          <select id="language">
+            <option value="中文">中文</option>
+            <option value="英文">英文</option>
+          </select>
+        </div>
+
+        <div class="input-boxs">
+          <div class="input-box">
+            <label for="fileInput1">选择学生作业图片：</label>
+            <input type="file" id="fileInput1" name="file1" accept="image/*" />
+            <img id="img1" alt="作业图片" class="img-show" />
+          </div>
+          <div class="input-box">
+            <label for="fileInput2">选择参考答案图片：</label>
+            <input type="file" id="fileInput2" name="file2" accept="image/*" />
+            <img id="img2" alt="答案图片" class="img-show" />
+          </div>
+        </div>
+
+        <button type="button" id="ScanButton">开始图片文本扫描</button>
+
+        <div class="form-group">
+          <label for="">OCR扫描结果展示（可修改）：</label>
+          <div class="input-boxs">
+            <div class="input-box">
+              <textarea
+                id="content_work"
+                placeholder="扫描作业图片内容展示"
+                rows="6"
+                style="width: 100%; resize: vertical"
+              ></textarea>
+            </div>
+            <div class="input-box">
+              <textarea
+                id="content_answer"
+                placeholder="扫描答案图片内容展示"
+                rows="6"
+                style="width: 100%; resize: vertical"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" id="CompareButton">开始文本语义匹配</button>
+
+        <div class="form-group">
+          <label for="inputPath">输入路径：</label>
+          <input
+            type="text"
+            id="DownloadPath"
+            placeholder="手动输入路径或选择路径"
+          />
+          <div class="download-box">
+            <button type="button" id="choosePathButton">选择下载路径</button>
+            <button type="button" id="DownloadButton">下载结果</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="output hidden" id="output">
+        <h3>处理结果：</h3>
+        <pre id="outputContent">等待处理...</pre>
+        <button id="downloadButton" class="hidden">下载结果</button>
+      </div>
+    </div>
+
+    <script>
+      // 处理文件选择后的路径更新和图片预览
+      document
+        .getElementById("fileInput1")
+        .addEventListener("change", function () {
+          const file = this.files[0];
+          if (file) {
+            // 显示预览
+            document.getElementById("img1").src = URL.createObjectURL(file);
+            document.getElementById("img1").style.display = "block"; // 显示图片
+          }
+        });
+
+      document
+        .getElementById("fileInput2")
+        .addEventListener("change", function () {
+          const file = this.files[0];
+          if (file) {
+            // 显示预览
+            document.getElementById("img2").src = URL.createObjectURL(file);
+            document.getElementById("img2").style.display = "block"; // 显示图片
+          }
+        });
+
+      document
+        .getElementById("ScanButton")
+        .addEventListener("click", async () => {
+          const fileInput1 = document.getElementById("fileInput1");
+          const fileInput2 = document.getElementById("fileInput2");
+
+          if (!fileInput1.files[0] || !fileInput2.files[0]) {
+            alert("请提供作业图片和参考答案图片！");
+            return;
+          }
+
+          const formData = new FormData();
+          formData.append("file1", fileInput1.files[0]);
+          formData.append("file2", fileInput2.files[0]);
+          formData.append("model", document.getElementById("model").value); // 选择的模型
+          formData.append(
+            "language",
+            document.getElementById("language").value
+          ); // 选择的语言
+
+          try {
+            const response = await fetch("http://127.0.0.1:5000/ocr", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await response.json();
+            const outputDiv = document.getElementById("output");
+            const outputContent = document.getElementById("outputContent");
+
+            if (response.ok) {
+              outputDiv.classList.remove("hidden");
+              outputContent.innerText =
+                `扫描结果（部分显示）：\n\n` +
+                `作业内容:\n${data.workContent}\n\n` +
+                `参考答案内容:\n${data.answerContent}`;
+
+              // 填充文本框中的扫描结果
+              document.getElementById("content_work").value = data.workContent;
+              document.getElementById("content_answer").value =
+                data.answerContent;
+            } else {
+              outputDiv.classList.remove("hidden");
+              outputContent.innerText = `处理失败：${data.message}`;
+            }
+          } catch (error) {
+            document.getElementById(
+              "outputContent"
+            ).innerText = `请求出错：${error.message}`;
+          }
+        });
+
+      // 处理文本匹配按钮
+      document
+        .getElementById("CompareButton")
+        .addEventListener("click", async () => {
+          const contentWork = document.getElementById("content_work").value;
+          const contentAnswer = document.getElementById("content_answer").value;
+
+          if (!contentWork || !contentAnswer) {
+            alert("请扫描并填写作业内容和参考答案内容！");
+            return;
+          }
+
+          const payload = {
+            workContent: contentWork,
+            answerContent: contentAnswer,
+          };
+
+          try {
+            const response = await fetch(
+              "http://127.0.0.1:5000/compare_texts",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+              }
+            );
+
+            const data = await response.json();
+            if (response.ok) {
+              alert(`文本匹配结果：\n相似度：${data.similarity}%`);
+            } else {
+              alert(`错误：${data.message}`);
+            }
+          } catch (error) {
+            alert(`请求失败：${error.message}`);
+          }
+        });
+    </script>
+  </body>
+</html>

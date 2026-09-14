@@ -1,0 +1,5 @@
+-r ../requirements.txt
+-c constraints.txt
+# Pinned v1 API, with bundled OCR models for offline operation after installation.
+rapidocr-onnxruntime==1.4.4
+pytesseract==0.3.13

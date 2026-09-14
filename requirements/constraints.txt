@@ -1,0 +1,5 @@
+# Known compatible CPU dependencies for Python 3.12 / Windows.
+numpy==1.26.4
+opencv-python==4.10.0.84
+opencv-contrib-python==4.10.0.84
+onnxruntime==1.20.1
