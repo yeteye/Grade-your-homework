@@ -1,0 +1,8 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{ record.studentName }} · 批改报告</title><link rel="stylesheet" href="/static/report.css"></head><body>
+<div class="tools"><button onclick="window.print()">打印 / 另存为 PDF</button><a href="/">返回工作台</a></div>
+<header><span>阅知 · HOMEWORK STUDIO</span><h1>{{ record.title }}</h1><p>{{ record.studentName }} · {{ display_time }}（本地时间）</p></header>
+<div class="score">{{ '%g'|format(record.score) }} <small>/ {{ '%g'|format(record.options.maxScore) }}</small></div><p>{{ '已达标' if record.passed else '待提升' }} · 得分率 {{ record.similarity }}% · 基础评分 {{ record.basePercent }}%</p>
+<p>{{ record.explanation }}</p>{% for warning in record.warnings %}<p class="warning">{{ warning }}</p>{% endfor %}
+<h2>参考答案</h2><pre>{{ record.answerContent }}</pre><h2>学生作答</h2><pre>{{ record.workContent }}</pre>
+{% if record.rubric %}<h2>评分要点</h2><ul>{% for point in record.rubric %}<li>{{ point.keyword }} · 权重 {{ point.weight }} · {{ '已覆盖' if point.matched else '未覆盖' }}</li>{% endfor %}</ul>{% endif %}
+<footer>本报告为辅助批改结果，请结合教学要求人工复核。<br>记录编号：{{ record.id }}</footer></body></html>
