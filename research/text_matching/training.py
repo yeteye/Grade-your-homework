@@ -1,10 +1,10 @@
 import paddle
 import paddle.nn.functional as F
 from paddle.metric import Metric
-import matplotlib.pyplot as plt
 
 #可视化
 def plot(runner, fig_name):
+    import matplotlib.pyplot as plt
     plt.figure(figsize=(10,5))
 
     plt.subplot(1,2,1)
