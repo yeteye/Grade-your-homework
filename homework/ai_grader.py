@@ -21,7 +21,7 @@ def parse_score(content):
         if not math.isfinite(score) or not 0 <= score <= 1:
             raise ValueError()
         return score
-    except (ValueError, TypeError, KeyError):
+    except (ValueError, TypeError, KeyError, OverflowError):
         raise GradingUnavailable('AI 返回的评分格式无效，已保留基础评分。') from None
 
 
