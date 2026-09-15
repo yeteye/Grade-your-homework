@@ -53,16 +53,16 @@ class ValidationTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             options({"engine": "unknown"})
 
-    def test_m1_ut_010_rubric_accepts_twenty_items(self):
+    def test_m1_ut_011_rubric_accepts_twenty_items(self):
         items = [{"keyword": f"要点{i}", "weight": 1} for i in range(20)]
         self.assertEqual(len(rubric(items)), 20)
 
-    def test_m1_ut_011_rubric_rejects_twenty_one_items(self):
+    def test_m1_ut_012_rubric_rejects_twenty_one_items(self):
         items = [{"keyword": f"要点{i}", "weight": 1} for i in range(21)]
         with self.assertRaises(ValidationError):
             rubric(items)
 
-    def test_m1_ut_012_rubric_rejects_duplicate_keyword(self):
+    def test_m1_ut_013_rubric_rejects_duplicate_keyword(self):
         with self.assertRaises(ValidationError):
             rubric([{"keyword": "缺陷", "weight": 1},
                     {"keyword": "缺陷", "weight": 2}])

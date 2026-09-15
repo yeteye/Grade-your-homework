@@ -24,43 +24,43 @@ class ScoringTests(unittest.TestCase):
         value.update(changes)
         return value
 
-    def test_m1_ut_013_normalize_unifies_width_case_and_punctuation(self):
+    def test_m1_ut_019_normalize_unifies_width_case_and_punctuation(self):
         self.assertEqual(normalize("ＡbＣ！"), "abc")
 
-    def test_m1_ut_014_lexical_identical_text_scores_one(self):
+    def test_m1_ut_020_lexical_identical_text_scores_one(self):
         self.assertEqual(lexical_similarity("软件测试", "软件测试"), 1)
 
-    def test_m1_ut_015_lexical_empty_normalized_text_scores_zero(self):
+    def test_m1_ut_021_lexical_empty_normalized_text_scores_zero(self):
         self.assertEqual(lexical_similarity("!!!", "软件测试"), 0)
 
-    def test_m1_ut_016_weighted_rubric_changes_score(self):
+    def test_m1_ut_014_weighted_rubric_changes_score(self):
         result = compare(self.payload(workContent="软件测试", rubric=[
             {"keyword": "软件", "weight": 1}, {"keyword": "缺陷", "weight": 1}]), DEFAULTS)
         expected = 0.4 * lexical_similarity("软件测试", "软件测试发现缺陷") + 0.6 * 0.5
         self.assertAlmostEqual(result["similarity"], round(expected * 100, 2))
 
-    def test_m1_ut_017_displayed_score_controls_pass_boundary(self):
+    def test_m1_ut_022_displayed_score_controls_pass_boundary(self):
         result = compare(self.payload(maxScore=10, passPercent=100), DEFAULTS)
         self.assertEqual(result["score"], 10)
         self.assertTrue(result["passed"])
 
-    def test_m1_ut_018_ai_failure_preserves_base_score(self):
+    def test_m1_ut_029_ai_failure_preserves_base_score(self):
         with patch("homework.scoring.get_points", side_effect=GradingUnavailable("模拟超时")):
             result = compare(self.payload(useDeepseek=True), DEFAULTS)
         self.assertEqual(result["score"], 100)
         self.assertEqual(result["warnings"], ["模拟超时"])
 
-    def test_m1_ut_019_ai_valid_score_is_weighted(self):
+    def test_m1_ut_030_ai_valid_score_is_weighted(self):
         with patch("homework.scoring.get_points", return_value=0.5):
             result = compare(self.payload(useDeepseek=True, aiWeight=40), DEFAULTS)
         self.assertEqual(result["score"], 80)
 
-    def test_m1_ut_020_ai_response_rejects_invalid_values(self):
+    def test_m1_ut_031_ai_response_rejects_invalid_values(self):
         for value in ("-0.1", "1.1", "NaN", "true", '{"score":"0.5"}'):
             with self.subTest(value=value), self.assertRaises(GradingUnavailable):
                 parse_score(value)
 
-    def test_m1_ut_021_transformer_accepts_combined_length_509(self):
+    def test_m1_ut_033_transformer_accepts_combined_length_509(self):
         fake = types.ModuleType("homework.models.transformer")
         fake.calculate_similarity = lambda _work, _answer: 0.8
         with patch.dict(sys.modules, {"homework.models.transformer": fake}):
@@ -68,41 +68,41 @@ class ScoringTests(unittest.TestCase):
                                           engine="transformer"), DEFAULTS)
         self.assertEqual(result["score"], 80)
 
-    def test_m1_ut_022_transformer_rejects_combined_length_510(self):
+    def test_m1_ut_034_transformer_rejects_combined_length_510(self):
         with self.assertRaises(ValidationError):
             compare(self.payload(workContent="甲" * 255, answerContent="乙" * 255,
                                  engine="transformer"), DEFAULTS)
 
-    def test_m1_ut_040_dice_counts_repeated_characters(self):
+    def test_m1_ut_023_dice_counts_repeated_characters(self):
         self.assertAlmostEqual(lexical_similarity("aab", "abb"), 2 / 3)
 
-    def test_m1_ut_041_character_order_does_not_change_lexical_score(self):
+    def test_m1_ut_024_character_order_does_not_change_lexical_score(self):
         result = compare(self.payload(workContent="测试软件", answerContent="软件测试"), DEFAULTS)
         self.assertEqual(result["score"], 100)
         self.assertIn("不能判断语义", result["explanation"])
 
-    def test_m1_ut_042_negation_requires_manual_review(self):
+    def test_m1_ut_025_negation_requires_manual_review(self):
         result = compare(self.payload(workContent="我不喜欢", answerContent="我喜欢"), DEFAULTS)
         self.assertEqual(result["similarity"], round(100 * 6 / 7, 2))
         self.assertIn("人工复核", result["explanation"])
 
-    def test_m1_ut_043_punctuation_only_answer_is_rejected(self):
+    def test_m1_ut_026_punctuation_only_answer_is_rejected(self):
         for field in ("workContent", "answerContent"):
             with self.subTest(field=field), self.assertRaises(ValidationError):
                 compare(self.payload(**{field: "！？。"}), DEFAULTS)
 
-    def test_m1_ut_044_partial_match_returns_score_and_diff(self):
+    def test_m1_ut_027_partial_match_returns_score_and_diff(self):
         result = compare(self.payload(workContent="A", answerContent="AB"), DEFAULTS)
         self.assertEqual(result["score"], 66.67)
         self.assertEqual(result["basePercent"], 66.67)
         self.assertTrue(any(part["type"] != "equal" for part in result["diff"]))
 
-    def test_m1_ut_045_rubric_keyword_length_boundaries(self):
+    def test_m1_ut_015_rubric_keyword_length_boundaries(self):
         self.assertEqual(len(compare(self.payload(rubric=[{"keyword": "词" * 80, "weight": 1}]), DEFAULTS)["rubric"]), 1)
         with self.assertRaises(ValidationError):
             compare(self.payload(rubric=[{"keyword": "词" * 81, "weight": 1}]), DEFAULTS)
 
-    def test_m1_ut_046_rubric_weight_boundaries(self):
+    def test_m1_ut_016_rubric_weight_boundaries(self):
         for value in (0.1, 100):
             with self.subTest(valid=value):
                 compare(self.payload(rubric=[{"keyword": "软件", "weight": value}]), DEFAULTS)
@@ -110,13 +110,13 @@ class ScoringTests(unittest.TestCase):
             with self.subTest(invalid=value), self.assertRaises(ValidationError):
                 compare(self.payload(rubric=[{"keyword": "软件", "weight": value}]), DEFAULTS)
 
-    def test_m1_ut_047_uneven_rubric_weights_drive_score(self):
+    def test_m1_ut_017_uneven_rubric_weights_drive_score(self):
         result = compare(self.payload(workContent="甲", answerContent="甲乙", rubric=[
             {"keyword": "甲", "weight": 3}, {"keyword": "乙", "weight": 1}]), DEFAULTS)
         self.assertEqual(result["basePercent"], 71.67)
         self.assertEqual(result["score"], 71.67)
 
-    def test_m1_ut_048_displayed_score_controls_fractional_threshold(self):
+    def test_m1_ut_028_displayed_score_controls_fractional_threshold(self):
         accepted = compare(self.payload(workContent="A", answerContent="AB", passPercent=66.67), DEFAULTS)
         rejected = compare(self.payload(workContent="A", answerContent="AB", passPercent=66.68), DEFAULTS)
         self.assertTrue(accepted["passed"])

@@ -32,35 +32,35 @@ class OcrSecurityTests(unittest.TestCase):
     def tearDown(self):
         self.folder.cleanup()
 
-    def test_m1_it_031_csv_formula_injection_is_escaped(self):
+    def test_m1_it_044_csv_formula_injection_is_escaped(self):
         self.client.post("/compare_texts", json={**self.payload, "studentName": "=1+1"})
         exported = self.client.get("/api/export").data.decode("utf-8-sig")
         self.assertIn("'=1+1", exported)
 
-    def test_m1_it_032_print_report_escapes_html(self):
+    def test_m1_it_045_print_report_escapes_html(self):
         created = self.client.post("/compare_texts", json={
             **self.payload, "workContent": "<script>alert(1)</script>"}).get_json()
         html = self.client.get("/records/" + created["id"] + "/print").data.decode()
         self.assertNotIn("<script>alert", html)
         self.assertIn("&lt;script&gt;", html)
 
-    def test_m1_it_033_cross_origin_write_is_rejected(self):
+    def test_m1_it_046_cross_origin_write_is_rejected(self):
         response = self.client.post("/compare_texts", json=self.payload,
                                     headers={"Origin": "https://example.com"})
         self.assertEqual(response.status_code, 403)
 
-    def test_m1_it_034_ocr_rejects_missing_second_image(self):
+    def test_m1_it_047_ocr_rejects_missing_second_image(self):
         response = self.client.post("/ocr", data={"file1": (png(), "a.png")})
         self.assertEqual(response.status_code, 400)
 
-    def test_m1_it_035_ocr_rejects_fake_image_before_engine_load(self):
+    def test_m1_it_048_ocr_rejects_fake_image_before_engine_load(self):
         with patch("homework.ocr.recognize") as engine:
             response = self.client.post("/ocr", data={
                 "file1": (io.BytesIO(b"bad"), "a.png"), "file2": (png(), "b.png")})
         self.assertEqual(response.status_code, 400)
         engine.assert_not_called()
 
-    def test_m1_it_036_ocr_same_names_are_isolated_and_cleaned(self):
+    def test_m1_it_049_ocr_same_names_are_isolated_and_cleaned(self):
         observed = []
 
         def recognize(path, _engine, _language):
