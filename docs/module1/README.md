@@ -34,6 +34,8 @@
 
 当前完整验证：`reports/module1/a-final-full.json`，在 `7ca7fc1` 源码上执行，开发检查 21 条、成员 A 正式用例 22 条，全部通过。修复前基线证据为 `reports/module1/a-defects-baseline.json`，其中 4 条新增缺陷用例失败。
 
+交付复核：`reports/module1/a-delivery-final.json` 在 `46b5d99` 上运行，43/43 通过；日志由提交 `8e04f23` 保存。源码修复和交付复核分别留有独立提交。
+
 ## 交付与交接
 
 | 作业要求 | 成员 A 交付 | 合并时需要成员 B 完成 |

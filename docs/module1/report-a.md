@@ -51,7 +51,7 @@ Windows x64；Python 3.12.14、Flask 3.1.3、Pillow 12.3.0、Werkzeug 3.1.8。�
 
 ### 5.1 执行结果
 
-冻结基线 `2da8824`：A 用例 22 条，18 通过、4 失败；失败编号 A-019～A-022。修复后源码提交 `7ca7fc1`：A 用例 22 条全部通过，原有开发检查 21 条全部通过，一键运行合计 43 项通过。失败及成功日志分别见 `reports/module1/a-defects-baseline.json`、`reports/module1/a-final-full.json`。参数变体未额外计数。
+冻结基线 `2da8824`：A 用例 22 条，18 通过、4 失败；失败编号 A-019～A-022。四项修复提交为 `358a085`、`ec22c91`、`103d09e`、`7ca7fc1`。修复后源码提交 `7ca7fc1`：A 用例 22 条全部通过，原有开发检查 21 条全部通过，一键运行合计 43 项通过。交付前又在 `46b5d99` 上复跑，结果仍为 43/43；对应证据提交为 `8e04f23`。失败和两轮成功日志分别见 `reports/module1/a-defects-baseline.json`、`reports/module1/a-final-full.json`、`reports/module1/a-delivery-final.json`。参数变体未额外计数。
 
 ### 5.2 缺陷摘要
 
