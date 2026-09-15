@@ -76,16 +76,16 @@ class ModuleOneValidationTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             options({"engine": "unknown"})
 
-    def test_m1_ut_010_rubric_accepts_twenty_items(self):
+    def test_m1_ut_011_rubric_accepts_twenty_items(self):
         items = [{"keyword": f"要点{i}", "weight": 1} for i in range(20)]
         self.assertEqual(len(rubric(items)), 20)
 
-    def test_m1_ut_011_rubric_rejects_twenty_one_items(self):
+    def test_m1_ut_012_rubric_rejects_twenty_one_items(self):
         items = [{"keyword": f"要点{i}", "weight": 1} for i in range(21)]
         with self.assertRaises(ValidationError):
             rubric(items)
 
-    def test_m1_ut_012_rubric_rejects_duplicate_keyword(self):
+    def test_m1_ut_013_rubric_rejects_duplicate_keyword(self):
         with self.assertRaises(ValidationError):
             rubric([{"keyword": "缺陷", "weight": 1}, {"keyword": "缺陷", "weight": 2}])
 
@@ -97,43 +97,43 @@ class ModuleOneScoringTests(unittest.TestCase):
         value.update(changes)
         return value
 
-    def test_m1_ut_013_normalize_unifies_width_case_and_punctuation(self):
+    def test_m1_ut_019_normalize_unifies_width_case_and_punctuation(self):
         self.assertEqual(normalize("ＡbＣ！"), "abc")
 
-    def test_m1_ut_014_lexical_identical_text_scores_one(self):
+    def test_m1_ut_020_lexical_identical_text_scores_one(self):
         self.assertEqual(lexical_similarity("软件测试", "软件测试"), 1)
 
-    def test_m1_ut_015_lexical_empty_normalized_text_scores_zero(self):
+    def test_m1_ut_021_lexical_empty_normalized_text_scores_zero(self):
         self.assertEqual(lexical_similarity("!!!", "软件测试"), 0)
 
-    def test_m1_ut_016_weighted_rubric_changes_score(self):
+    def test_m1_ut_014_weighted_rubric_changes_score(self):
         result = compare(self.payload(workContent="软件测试", rubric=[
             {"keyword": "软件", "weight": 1}, {"keyword": "缺陷", "weight": 1}]), DEFAULTS)
         expected = 0.4 * lexical_similarity("软件测试", "软件测试发现缺陷") + 0.6 * 0.5
         self.assertAlmostEqual(result["similarity"], round(expected * 100, 2))
 
-    def test_m1_ut_017_displayed_score_controls_pass_boundary(self):
+    def test_m1_ut_022_displayed_score_controls_pass_boundary(self):
         result = compare(self.payload(maxScore=10, passPercent=100), DEFAULTS)
         self.assertEqual(result["score"], 10)
         self.assertTrue(result["passed"])
 
-    def test_m1_ut_018_ai_failure_preserves_base_score(self):
+    def test_m1_ut_029_ai_failure_preserves_base_score(self):
         with patch("homework.scoring.get_points", side_effect=GradingUnavailable("模拟超时")):
             result = compare(self.payload(useDeepseek=True), DEFAULTS)
         self.assertEqual(result["score"], 100)
         self.assertEqual(result["warnings"], ["模拟超时"])
 
-    def test_m1_ut_019_ai_valid_score_is_weighted(self):
+    def test_m1_ut_030_ai_valid_score_is_weighted(self):
         with patch("homework.scoring.get_points", return_value=0.5):
             result = compare(self.payload(useDeepseek=True, aiWeight=40), DEFAULTS)
         self.assertEqual(result["score"], 80)
 
-    def test_m1_ut_020_ai_response_rejects_invalid_values(self):
+    def test_m1_ut_031_ai_response_rejects_invalid_values(self):
         for value in ("-0.1", "1.1", "NaN", "true", '{"score":"0.5"}'):
             with self.subTest(value=value), self.assertRaises(GradingUnavailable):
                 parse_score(value)
 
-    def test_m1_ut_021_transformer_accepts_combined_length_509(self):
+    def test_m1_ut_033_transformer_accepts_combined_length_509(self):
         fake = types.ModuleType("homework.models.transformer")
         fake.calculate_similarity = lambda _work, _answer: 0.8
         with patch.dict(sys.modules, {"homework.models.transformer": fake}):
@@ -141,41 +141,41 @@ class ModuleOneScoringTests(unittest.TestCase):
                                           engine="transformer"), DEFAULTS)
         self.assertEqual(result["score"], 80)
 
-    def test_m1_ut_022_transformer_rejects_combined_length_510(self):
+    def test_m1_ut_034_transformer_rejects_combined_length_510(self):
         with self.assertRaises(ValidationError):
             compare(self.payload(workContent="甲" * 255, answerContent="乙" * 255,
                                  engine="transformer"), DEFAULTS)
 
-    def test_m1_ut_040_dice_counts_repeated_characters(self):
+    def test_m1_ut_023_dice_counts_repeated_characters(self):
         self.assertAlmostEqual(lexical_similarity("aab", "abb"), 2 / 3)
 
-    def test_m1_ut_041_character_order_does_not_change_lexical_score(self):
+    def test_m1_ut_024_character_order_does_not_change_lexical_score(self):
         result = compare(self.payload(workContent="测试软件", answerContent="软件测试"), DEFAULTS)
         self.assertEqual(result["score"], 100)
         self.assertIn("不能判断语义", result["explanation"])
 
-    def test_m1_ut_042_negation_requires_manual_review(self):
+    def test_m1_ut_025_negation_requires_manual_review(self):
         result = compare(self.payload(workContent="我不喜欢", answerContent="我喜欢"), DEFAULTS)
         self.assertEqual(result["similarity"], round(100 * 6 / 7, 2))
         self.assertIn("人工复核", result["explanation"])
 
-    def test_m1_ut_043_punctuation_only_answer_is_rejected(self):
+    def test_m1_ut_026_punctuation_only_answer_is_rejected(self):
         for field in ("workContent", "answerContent"):
             with self.subTest(field=field), self.assertRaises(ValidationError):
                 compare(self.payload(**{field: "！？。"}), DEFAULTS)
 
-    def test_m1_ut_044_partial_match_returns_score_and_diff(self):
+    def test_m1_ut_027_partial_match_returns_score_and_diff(self):
         result = compare(self.payload(workContent="A", answerContent="AB"), DEFAULTS)
         self.assertEqual(result["score"], 66.67)
         self.assertEqual(result["basePercent"], 66.67)
         self.assertTrue(any(part["type"] != "equal" for part in result["diff"]))
 
-    def test_m1_ut_045_rubric_keyword_length_boundaries(self):
+    def test_m1_ut_015_rubric_keyword_length_boundaries(self):
         self.assertEqual(len(compare(self.payload(rubric=[{"keyword": "词" * 80, "weight": 1}]), DEFAULTS)["rubric"]), 1)
         with self.assertRaises(ValidationError):
             compare(self.payload(rubric=[{"keyword": "词" * 81, "weight": 1}]), DEFAULTS)
 
-    def test_m1_ut_046_rubric_weight_boundaries(self):
+    def test_m1_ut_016_rubric_weight_boundaries(self):
         for value in (0.1, 100):
             with self.subTest(valid=value):
                 compare(self.payload(rubric=[{"keyword": "软件", "weight": value}]), DEFAULTS)
@@ -183,13 +183,13 @@ class ModuleOneScoringTests(unittest.TestCase):
             with self.subTest(invalid=value), self.assertRaises(ValidationError):
                 compare(self.payload(rubric=[{"keyword": "软件", "weight": value}]), DEFAULTS)
 
-    def test_m1_ut_047_uneven_rubric_weights_drive_score(self):
+    def test_m1_ut_017_uneven_rubric_weights_drive_score(self):
         result = compare(self.payload(workContent="甲", answerContent="甲乙", rubric=[
             {"keyword": "甲", "weight": 3}, {"keyword": "乙", "weight": 1}]), DEFAULTS)
         self.assertEqual(result["basePercent"], 71.67)
         self.assertEqual(result["score"], 71.67)
 
-    def test_m1_ut_048_displayed_score_controls_fractional_threshold(self):
+    def test_m1_ut_028_displayed_score_controls_fractional_threshold(self):
         accepted = compare(self.payload(workContent="A", answerContent="AB", passPercent=66.67), DEFAULTS)
         rejected = compare(self.payload(workContent="A", answerContent="AB", passPercent=66.68), DEFAULTS)
         self.assertTrue(accepted["passed"])
@@ -211,18 +211,18 @@ class ModuleOneApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, expected, response.get_json())
         self.assertEqual(self.client.get("/api/stats").get_json()["total"], 0)
 
-    def test_m1_it_023_compare_persists_record(self):
+    def test_m1_it_036_compare_persists_record(self):
         created = self.client.post("/compare_texts", json=self.payload)
         self.assertEqual(created.status_code, 200)
         record = self.client.get("/api/records/" + created.get_json()["id"])
         self.assertEqual(record.get_json()["workContent"], self.payload["workContent"])
 
-    def test_m1_it_024_invalid_compare_does_not_persist(self):
+    def test_m1_it_037_invalid_compare_does_not_persist(self):
         response = self.client.post("/compare_texts", json={**self.payload, "workContent": " "})
         self.assertEqual(response.status_code, 400)
         self.assertEqual(self.client.get("/api/stats").get_json()["total"], 0)
 
-    def test_m1_it_025_batch_accepts_one_and_twenty_items(self):
+    def test_m1_it_038_batch_accepts_one_and_twenty_items(self):
         for count in (1, 20):
             with self.subTest(count=count):
                 data = {**self.payload, "useDeepseek": False,
@@ -231,24 +231,24 @@ class ModuleOneApiTests(unittest.TestCase):
                 self.assertEqual(response.status_code, 201)
                 self.assertEqual(response.get_json()["count"], count)
 
-    def test_m1_it_026_batch_rejects_zero_and_twenty_one_items(self):
+    def test_m1_it_039_batch_rejects_zero_and_twenty_one_items(self):
         for count in (0, 21):
             with self.subTest(count=count):
                 response = self.client.post("/api/batch", json={**self.payload, "items": [{}] * count})
                 self.assertEqual(response.status_code, 400)
 
-    def test_m1_it_027_batch_failure_is_atomic(self):
+    def test_m1_it_040_batch_failure_is_atomic(self):
         data = {**self.payload, "items": [
             {"studentName": "甲", "workContent": "有效"}, {"studentName": "乙", "workContent": ""}]}
         self.assertEqual(self.client.post("/api/batch", json=data).status_code, 400)
         self.assertEqual(self.client.get("/api/stats").get_json()["total"], 0)
 
-    def test_m1_it_028_settings_persist_after_restart(self):
+    def test_m1_it_041_settings_persist_after_restart(self):
         self.assertEqual(self.client.put("/api/settings", json={"maxScore": 20}).status_code, 200)
         other = create_app({"TESTING": True, "DATA_DIR": self.folder.name}).test_client()
         self.assertEqual(other.get("/api/settings").get_json()["maxScore"], 20)
 
-    def test_m1_it_029_template_crud(self):
+    def test_m1_it_042_template_crud(self):
         body = {"title": "功能测试", "answerContent": "参考答案", "rubric": []}
         created = self.client.post("/api/templates", json=body)
         identifier = created.get_json()["id"]
@@ -256,41 +256,41 @@ class ModuleOneApiTests(unittest.TestCase):
         self.assertEqual(self.client.put("/api/templates/" + identifier, json={**body, "title": "已更新"}).status_code, 200)
         self.assertEqual(self.client.delete("/api/templates/" + identifier).status_code, 200)
 
-    def test_m1_it_030_record_filter_and_pagination_validation(self):
+    def test_m1_it_043_record_filter_and_pagination_validation(self):
         self.client.post("/compare_texts", json=self.payload)
         self.assertEqual(self.client.get("/api/records?q=不存在").get_json()["total"], 0)
         self.assertEqual(self.client.get("/api/records?status=passed").get_json()["total"], 1)
         self.assertEqual(self.client.get("/api/records?page=0").status_code, 400)
 
-    def test_m1_it_031_csv_formula_injection_is_escaped(self):
+    def test_m1_it_044_csv_formula_injection_is_escaped(self):
         self.client.post("/compare_texts", json={**self.payload, "studentName": "=1+1"})
         exported = self.client.get("/api/export").data.decode("utf-8-sig")
         self.assertIn("'=1+1", exported)
 
-    def test_m1_it_032_print_report_escapes_html(self):
+    def test_m1_it_045_print_report_escapes_html(self):
         created = self.client.post("/compare_texts", json={**self.payload,
             "workContent": "<script>alert(1)</script>"}).get_json()
         html = self.client.get("/records/" + created["id"] + "/print").data.decode()
         self.assertNotIn("<script>alert", html)
         self.assertIn("&lt;script&gt;", html)
 
-    def test_m1_it_033_cross_origin_write_is_rejected(self):
+    def test_m1_it_046_cross_origin_write_is_rejected(self):
         response = self.client.post("/compare_texts", json=self.payload,
                                     headers={"Origin": "https://example.com"})
         self.assertEqual(response.status_code, 403)
 
-    def test_m1_it_034_ocr_rejects_missing_second_image(self):
+    def test_m1_it_047_ocr_rejects_missing_second_image(self):
         response = self.client.post("/ocr", data={"file1": (png(), "a.png")})
         self.assertEqual(response.status_code, 400)
 
-    def test_m1_it_035_ocr_rejects_fake_image_before_engine_load(self):
+    def test_m1_it_048_ocr_rejects_fake_image_before_engine_load(self):
         with patch("homework.ocr.recognize") as engine:
             response = self.client.post("/ocr", data={"file1": (io.BytesIO(b"bad"), "a.png"),
                                                         "file2": (png(), "b.png")})
         self.assertEqual(response.status_code, 400)
         engine.assert_not_called()
 
-    def test_m1_it_036_ocr_same_names_are_isolated_and_cleaned(self):
+    def test_m1_it_049_ocr_same_names_are_isolated_and_cleaned(self):
         observed = []
 
         def recognize(path, _engine, _language):
@@ -306,17 +306,17 @@ class ModuleOneApiTests(unittest.TestCase):
         self.assertEqual(observed, [(255, 0, 0), (0, 0, 255)])
         self.assertEqual(list((Path(self.folder.name) / "temp").iterdir()), [])
 
-    def test_m1_it_049_giant_numeric_input_is_validation_error(self):
+    def test_m1_it_010_giant_numeric_input_is_validation_error(self):
         self.assert_rejected_without_record(maxScore=10 ** 400)
 
-    def test_m1_it_050_normalized_duplicate_rubric_is_rejected(self):
+    def test_m1_it_018_normalized_duplicate_rubric_is_rejected(self):
         self.assert_rejected_without_record(workContent="A", answerContent="AB", rubric=[
             {"keyword": "A", "weight": 1},
             {"keyword": "Ａ", "weight": 1},
             {"keyword": "Z", "weight": 1},
         ])
 
-    def test_m1_it_051_invalid_transformer_probability_is_rejected(self):
+    def test_m1_it_035_invalid_transformer_probability_is_rejected(self):
         fake = types.ModuleType("homework.models.transformer")
         with patch.dict(sys.modules, {"homework.models.transformer": fake}):
             for value in (-0.1, 2.0, float("nan"), float("inf")):
@@ -328,7 +328,7 @@ class ModuleOneApiTests(unittest.TestCase):
                     self.assertEqual(response.status_code, 503, response.get_json())
         self.assertEqual(self.client.get("/api/stats").get_json()["total"], 0)
 
-    def test_m1_it_052_giant_ai_response_keeps_local_score(self):
+    def test_m1_it_032_giant_ai_response_keeps_local_score(self):
         cloud_content = json.dumps({"score": 10 ** 400})
         response_body = json.dumps({"choices": [{"message": {"content": cloud_content}}]})
         with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-only"}), \
@@ -342,19 +342,19 @@ class ModuleOneApiTests(unittest.TestCase):
 
 
 class ModuleOneImageTests(unittest.TestCase):
-    def test_m1_ut_037_grayscale_mode_outputs_rgb(self):
+    def test_m1_ut_050_grayscale_mode_outputs_rgb(self):
         result = prepare_image(Image.new("RGB", (2, 2), "red"), "grayscale")
         self.assertEqual(result.mode, "RGB")
         self.assertEqual(result.getpixel((0, 0))[0], result.getpixel((0, 0))[1])
 
-    def test_m1_ut_038_binary_mode_preserves_dark_text(self):
+    def test_m1_ut_051_binary_mode_preserves_dark_text(self):
         image = Image.new("RGB", (4, 2), "white")
         image.putpixel((0, 0), (20, 20, 20))
         result = prepare_image(image, "binary")
         self.assertEqual(result.getpixel((0, 0)), (0, 0, 0))
         self.assertEqual(result.getpixel((3, 1)), (255, 255, 255))
 
-    def test_m1_ut_039_unknown_preprocessing_mode_is_rejected(self):
+    def test_m1_ut_052_unknown_preprocessing_mode_is_rejected(self):
         with self.assertRaises(ValidationError):
             prepare_image(Image.new("RGB", (2, 2), "white"), "unknown")
 
