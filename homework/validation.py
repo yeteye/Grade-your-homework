@@ -20,8 +20,6 @@ def text(value, label, limit=5000, required=True):
 def number(value, label, low, high):
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValidationError(f'{label}必须是数字。')
-    # Check the bounded interval first: isfinite() converts integers to float
-    # and raises OverflowError for arbitrarily large JSON integers.
     if not low <= value <= high or not math.isfinite(value):
         raise ValidationError(f'{label}须在 {low}～{high} 之间。')
     return float(value)

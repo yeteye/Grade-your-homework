@@ -29,3 +29,22 @@ runtime/
 Tesseract-OCR/
 tesseract/
 tesseract-ocr-w64.exe
+
+# Local contributor/agent instructions and tooling
+AGENTS.md
+.agents/
+.codex/
+
+# Generated coursework documents, presentations, and authoring intermediates
+/outputs/
+/.artifacts/
+/.chart-data-*/
+/.codex-finalizer/
+*.ppt
+*.pptx
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.pdf
+~$*

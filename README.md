@@ -173,15 +173,17 @@ instance/                    本机数据库、临时文件与工具输出（不
 
 `checks/` 验证本次改造的关键行为与安全回归，在独立临时数据库中运行。外部 OCR / AI 异常使用替身模拟；这些通过不代表真实模型精度或云端连接已验证，也不替代课程用例清单、缺陷报告或测试报告。
 
-## 课程模块一测试
+### 模块一自动化测试
 
-本阶段的被测基线为 `2da8824`。成员 A 的正式用例与四个缺陷闭环说明见 [模块一测试协作](docs/module1/README.md)。安装基础依赖后，在项目根目录一键运行：
+双击 `run-module1-tests.bat` 可一键执行模块一的 52 条自动化用例；也可以在项目目录运行：
 
 ```powershell
-.\run-module1.bat --suite all --label my-run-1
+.\.venv\Scripts\python.exe -m unittest checks.test_module1 -v
 ```
 
-每次使用新的 `--label`，运行输出保存在 `reports/module1/`。`checks/` 的旧开发回归测试与 `tests/module1/` 的课程正式用例分别计数；完整小组交付需合并队友的用例、报告与演示材料。
+脚本覆盖输入等价类与边界值、字符 Dice 限制、评分规则、批量事务、模板与设置持久化、导出安全、OCR 文件隔离及 Transformer 长度和返回值边界。新增材料经语义去重后并入 13 条用例，其中 4 条用于验证已修复缺陷。模块一执行结果为 52/52，全量回归为 73/73。OCR、Transformer 和云端 AI 使用可控替身保证结果可重复；真实模型精度及在线服务质量需另行使用样本集和稳定网络评估。
+
+需要分批运行时，可分别执行 `checks/module1_parts/test_validation.py`、`test_scoring.py`、`test_business_api.py`、`test_ocr_security.py` 和 `test_image_preprocessing.py`。这些脚本不包含成员姓名；完整入口仍为 `checks/test_module1.py`。
 
 本版本默认只监听 `127.0.0.1`，供本机演示和使用，没有多用户身份认证。数据库路径可通过 `HOMEWORK_DATA_DIR` 指定；备份时先停止服务，再复制整个 `instance/` 目录。CSV 导出不是完整数据库备份。上传图片识别后不保留，识别文字与批改记录会保留到主动删除。
 
