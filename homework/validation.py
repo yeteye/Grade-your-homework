@@ -1,4 +1,5 @@
 import math
+from .normalization import normalize
 
 
 class ValidationError(ValueError):
@@ -48,6 +49,6 @@ def rubric(value):
             raise ValidationError('评分要点格式错误。')
         result.append({'keyword': text(item.get('keyword'), '要点关键词', 80),
                        'weight': number(item.get('weight', 1), '要点权重', 0.1, 100)})
-    if len({r['keyword'].casefold() for r in result}) != len(result):
+    if len({normalize(r['keyword']) for r in result}) != len(result):
         raise ValidationError('评分要点关键词不能重复。')
     return result
