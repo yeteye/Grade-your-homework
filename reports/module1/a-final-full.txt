@@ -1,0 +1,52 @@
+test_explicit_tesseract_path_is_not_silently_replaced (test_ocr_configuration.OcrConfigurationChecks.test_explicit_tesseract_path_is_not_silently_replaced) ... ok
+test_local_runtime_and_language_detection_with_spaces (test_ocr_configuration.OcrConfigurationChecks.test_local_runtime_and_language_detection_with_spaces) ... ok
+test_missing_model_files_do_not_report_ready (test_ocr_configuration.OcrConfigurationChecks.test_missing_model_files_do_not_report_ready) ... ok
+test_ai_failure_keeps_base_score (test_regressions.RegressionChecks.test_ai_failure_keeps_base_score) ... ok
+test_ai_score_validation (test_regressions.RegressionChecks.test_ai_score_validation) ... ok
+test_batch_all_or_nothing (test_regressions.RegressionChecks.test_batch_all_or_nothing) ... ok
+test_csv_formula_and_html_are_escaped (test_regressions.RegressionChecks.test_csv_formula_and_html_are_escaped) ... ok
+test_filter_and_invalid_pagination (test_regressions.RegressionChecks.test_filter_and_invalid_pagination) ... ok
+test_invalid_image_fails_before_engine_load (test_regressions.RegressionChecks.test_invalid_image_fails_before_engine_load) ... ok
+test_long_model_input_rejected_before_loading (test_regressions.RegressionChecks.test_long_model_input_rejected_before_loading) ... ok
+test_normalization (test_regressions.RegressionChecks.test_normalization) ... ok
+test_ocr_failure_is_json_and_cleans_files (test_regressions.RegressionChecks.test_ocr_failure_is_json_and_cleans_files) ... ok
+test_parameter_validation (test_regressions.RegressionChecks.test_parameter_validation) ... ok
+test_path_name_is_never_used_for_writing (test_regressions.RegressionChecks.test_path_name_is_never_used_for_writing) ... ok
+test_persist_and_export_actual_result (test_regressions.RegressionChecks.test_persist_and_export_actual_result) ... ok
+test_same_name_images_are_isolated_and_cleaned (test_regressions.RegressionChecks.test_same_name_images_are_isolated_and_cleaned) ... ok
+test_same_origin_guard (test_regressions.RegressionChecks.test_same_origin_guard) ... ok
+test_template_and_settings_persist_across_app_restart (test_regressions.RegressionChecks.test_template_and_settings_persist_across_app_restart) ... ok
+test_classification_denominators (test_tools.ToolChecks.test_classification_denominators) ... ok
+test_otsu_preserves_black_text_on_white (test_tools.ToolChecks.test_otsu_preserves_black_text_on_white) ... ok
+test_preprocessing_validation_and_constant_image (test_tools.ToolChecks.test_preprocessing_validation_and_constant_image) ... ok
+test_a019_giant_numeric_input_is_validation_error (tests.module1.test_a_defects.DefectCases.test_a019_giant_numeric_input_is_validation_error)
+A bounded numeric setting should reject even an unconvertible integer. ... ok
+test_a020_normalized_duplicate_rubric_is_rejected (tests.module1.test_a_defects.DefectCases.test_a020_normalized_duplicate_rubric_is_rejected)
+Keywords that match the same normalized content should be one keyword. ... ok
+test_a021_invalid_model_probability_cannot_be_hidden_by_rubric (tests.module1.test_a_defects.DefectCases.test_a021_invalid_model_probability_cannot_be_hidden_by_rubric)
+Validate the model's probability before mixing with a rubric. ... ok
+test_a022_giant_ai_response_keeps_local_score (tests.module1.test_a_defects.DefectCases.test_a022_giant_ai_response_keeps_local_score)
+An invalid cloud response should trigger the documented local fallback. ... ok
+test_a013_rubric_count_boundaries (tests.module1.test_a_rubric.RubricCases.test_a013_rubric_count_boundaries) ... ok
+test_a014_keyword_length_boundaries (tests.module1.test_a_rubric.RubricCases.test_a014_keyword_length_boundaries) ... ok
+test_a015_keyword_weight_boundaries (tests.module1.test_a_rubric.RubricCases.test_a015_keyword_weight_boundaries) ... ok
+test_a016_weighted_coverage_drives_base_score (tests.module1.test_a_rubric.RubricCases.test_a016_weighted_coverage_drives_base_score) ... ok
+test_a017_pass_threshold_uses_displayed_score (tests.module1.test_a_rubric.RubricCases.test_a017_pass_threshold_uses_displayed_score) ... ok
+test_a018_ai_weight_and_failure_fallback (tests.module1.test_a_rubric.RubricCases.test_a018_ai_weight_and_failure_fallback) ... ok
+test_a007_nfkc_case_and_punctuation_normalization (tests.module1.test_a_similarity.SimilarityCases.test_a007_nfkc_case_and_punctuation_normalization) ... ok
+test_a008_dice_uses_character_multiplicity (tests.module1.test_a_similarity.SimilarityCases.test_a008_dice_uses_character_multiplicity) ... ok
+test_a009_character_order_does_not_change_lexical_score (tests.module1.test_a_similarity.SimilarityCases.test_a009_character_order_does_not_change_lexical_score) ... ok
+test_a010_negation_is_documented_lexical_limit (tests.module1.test_a_similarity.SimilarityCases.test_a010_negation_is_documented_lexical_limit) ... ok
+test_a011_punctuation_only_answer_is_rejected (tests.module1.test_a_similarity.SimilarityCases.test_a011_punctuation_only_answer_is_rejected) ... ok
+test_a012_result_contains_score_and_text_difference (tests.module1.test_a_similarity.SimilarityCases.test_a012_result_contains_score_and_text_difference) ... ok
+test_a001_missing_or_blank_answer_fields (tests.module1.test_a_validation.ValidationCases.test_a001_missing_or_blank_answer_fields) ... ok
+test_a002_text_at_5000_character_boundary (tests.module1.test_a_validation.ValidationCases.test_a002_text_at_5000_character_boundary) ... ok
+test_a003_text_over_5000_character_boundary (tests.module1.test_a_validation.ValidationCases.test_a003_text_over_5000_character_boundary) ... ok
+test_a004_max_score_boundaries (tests.module1.test_a_validation.ValidationCases.test_a004_max_score_boundaries) ... ok
+test_a005_percent_boundaries (tests.module1.test_a_validation.ValidationCases.test_a005_percent_boundaries) ... ok
+test_a006_non_numeric_or_non_finite_scores (tests.module1.test_a_validation.ValidationCases.test_a006_non_numeric_or_non_finite_scores) ... ok
+
+----------------------------------------------------------------------
+Ran 43 tests in 2.444s
+
+OK

@@ -1,0 +1,615 @@
+{
+  "started_at_utc": "2026-09-14T23:31:29.176163+00:00",
+  "source_commit": "7ca7fc18d34acdc5aa946041ed07dc504d39a48c",
+  "source_mode": "working tree",
+  "test_commit": "7ca7fc18d34acdc5aa946041ed07dc504d39a48c",
+  "source_hashes": {
+    "homework/__init__.py": "b9805f0fb59c9152deb44bc3acb7acafd6ac08ea54bd1101b6e6742bdffc0ec0",
+    "homework/ai_grader.py": "d804beccb8db97cb1fcde1d2cd14e340701c4576a2f84f071d49ca1abffc8cc2",
+    "homework/models/__init__.py": "a7bc8fb4ec9fc6eb3e029ac7a52cbb2eb7a0a7638224135fff50420246a6fb42",
+    "homework/models/transformer.py": "378e536cbdfdd9e4c4d55d47dd328a5dd562b84644b25c53366d420098d34acb",
+    "homework/normalization.py": "219d74f86f7f12708ac784553eb202f844fbb3f77264eae0433fd8b8ecd50dc2",
+    "homework/ocr.py": "bdc86e94cf8329a69521506ea7937ada24e21fd2ae202cd016179e612b812789",
+    "homework/ocr_config.py": "2aa5fb96ac575b84f030264d7736f41dfef034e95d719bf82ace533adad0ef5b",
+    "homework/preprocessing.py": "36c59606cbd8e1e6b1e185c6af2dc7178d6f93c870eaef4c64937ed4f1fe1aa5",
+    "homework/scoring.py": "76aed85e08ae010483d1e3a7faca878ef9e058817370321015a3d60cc7b68949",
+    "homework/storage.py": "1164381c80e2d90f883e2da8e123024aa4dbe8eb3fb8e089959e78ee07d072c2",
+    "homework/validation.py": "a205f22339f0cb0eeec1b704e92675b0735bf49193667e8fcd7fd64677bf0eb3",
+    "server.py": "1ce0bd1f9d05e5943b8c0612585f19e70a0928c5cc98ef7ec76a0b324ee1046d"
+  },
+  "test_hashes": {
+    "tests/module1/__init__.py": "fef37da33341face7b4132cfef39e393b6760cc1953da4bca66acb8af1d34eee",
+    "tests/module1/support.py": "b7e0c8ccfd7b807e6dd82b2d0c22395a2be8309b606269d8ce7e2f2963133d3f",
+    "tests/module1/test_a_defects.py": "2bde75c7b73dbe9e8e35bc0689ebc2430f9b988699940bef3c7d7a9bb0c696f9",
+    "tests/module1/test_a_rubric.py": "538e31eeeb23f0515e8ea4b0d32355c85faed0b916f56bcb7bb81a7de55ce205",
+    "tests/module1/test_a_similarity.py": "ea98fec6da240a96d3ff240868489627c3cb5c6bc709e7b88c6116c6e08cc2b0",
+    "tests/module1/test_a_validation.py": "9b6d2a471e3712c746ce6d81e4dd11b78d17030073b49589adc6a61a23a1a414",
+    "checks/test_ocr_configuration.py": "de6490f7ca2387176a1c630b5a418511595c12a3807344f8fedbb5477a865e8d",
+    "checks/test_regressions.py": "52ec675cea2fff7b2866338bff3bdfe865c61ab4ed7e19a99a90c19fc0ae3a19",
+    "checks/test_tools.py": "d287a2fd63fb8b59b10335e2d89d8fd7cc19d25ff49ae2e6708eb383304048dc"
+  },
+  "runner_sha256": "80e31641011a78df3ba10195290a7e32b17570f696356f58dc25867ddf1ac913",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26220-SP0",
+  "dependencies": {
+    "Flask": "3.1.3",
+    "Pillow": "12.3.0",
+    "Werkzeug": "3.1.8",
+    "waitress": "3.0.2"
+  },
+  "command": [
+    "tools\\run_module1.py",
+    "--suite",
+    "all",
+    "--label",
+    "a-final-full"
+  ],
+  "suite": "all",
+  "tests_run": 43,
+  "outcomes": {
+    "passed": 43,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected_failure": 0,
+    "unexpected_success": 0
+  },
+  "formal_cases": 22,
+  "parameter_variants": 60,
+  "successful": true,
+  "results": [
+    {
+      "test": "test_ocr_configuration.OcrConfigurationChecks.test_explicit_tesseract_path_is_not_silently_replaced",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.002323
+    },
+    {
+      "test": "test_ocr_configuration.OcrConfigurationChecks.test_local_runtime_and_language_detection_with_spaces",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.01616
+    },
+    {
+      "test": "test_ocr_configuration.OcrConfigurationChecks.test_missing_model_files_do_not_report_ready",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.049785
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_ai_failure_keeps_base_score",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.121257
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_ai_score_validation",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [
+        {
+          "parameters": "_OrderedChainMap({'value': '-0.1'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'value': '1.1'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'value': 'NaN'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'value': 'Infinity'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'value': 'true'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'value': '{\"score\":\"0.5\"}'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'value': '评分为0.8'})",
+          "status": "passed"
+        }
+      ],
+      "seconds": 0.065105
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_batch_all_or_nothing",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.104293
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_csv_formula_and_html_are_escaped",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.12678
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_filter_and_invalid_pagination",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.095945
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_invalid_image_fails_before_engine_load",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.295126
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_long_model_input_rejected_before_loading",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.028749
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_normalization",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.031848
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_ocr_failure_is_json_and_cleans_files",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.037251
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_parameter_validation",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [
+        {
+          "parameters": "_OrderedChainMap({'body_type': 'NoneType'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'body_type': 'list'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'body_type': 'str'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'body_type': 'dict'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'body_type': 'dict'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'body_type': 'dict'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'body_type': 'dict'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'body_type': 'dict'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'body_type': 'dict'})",
+          "status": "passed"
+        }
+      ],
+      "seconds": 0.04478
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_path_name_is_never_used_for_writing",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.036159
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_persist_and_export_actual_result",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.059279
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_same_name_images_are_isolated_and_cleaned",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.055006
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_same_origin_guard",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.030238
+    },
+    {
+      "test": "test_regressions.RegressionChecks.test_template_and_settings_persist_across_app_restart",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.077963
+    },
+    {
+      "test": "test_tools.ToolChecks.test_classification_denominators",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 5.1e-05
+    },
+    {
+      "test": "test_tools.ToolChecks.test_otsu_preserves_black_text_on_white",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.000255
+    },
+    {
+      "test": "test_tools.ToolChecks.test_preprocessing_validation_and_constant_image",
+      "case_id": null,
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.000295
+    },
+    {
+      "test": "tests.module1.test_a_defects.DefectCases.test_a019_giant_numeric_input_is_validation_error",
+      "case_id": "A-019",
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.040316
+    },
+    {
+      "test": "tests.module1.test_a_defects.DefectCases.test_a020_normalized_duplicate_rubric_is_rejected",
+      "case_id": "A-020",
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.040721
+    },
+    {
+      "test": "tests.module1.test_a_defects.DefectCases.test_a021_invalid_model_probability_cannot_be_hidden_by_rubric",
+      "case_id": "A-021",
+      "status": "passed",
+      "subtests": [
+        {
+          "parameters": "_OrderedChainMap({'model_output': '-0.1'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'model_output': '2.0'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'model_output': 'nan'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'model_output': 'inf'})",
+          "status": "passed"
+        }
+      ],
+      "seconds": 0.060154
+    },
+    {
+      "test": "tests.module1.test_a_defects.DefectCases.test_a022_giant_ai_response_keeps_local_score",
+      "case_id": "A-022",
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.045218
+    },
+    {
+      "test": "tests.module1.test_a_rubric.RubricCases.test_a013_rubric_count_boundaries",
+      "case_id": "A-013",
+      "status": "passed",
+      "subtests": [
+        {
+          "parameters": "_OrderedChainMap({'valid': 0})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'valid': 1})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'valid': 20})",
+          "status": "passed"
+        }
+      ],
+      "seconds": 0.098139
+    },
+    {
+      "test": "tests.module1.test_a_rubric.RubricCases.test_a014_keyword_length_boundaries",
+      "case_id": "A-014",
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.04881
+    },
+    {
+      "test": "tests.module1.test_a_rubric.RubricCases.test_a015_keyword_weight_boundaries",
+      "case_id": "A-015",
+      "status": "passed",
+      "subtests": [
+        {
+          "parameters": "_OrderedChainMap({'valid': 0.1})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'valid': 100})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'invalid': 0})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'invalid': 0.09})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'invalid': 100.01})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'invalid': True})",
+          "status": "passed"
+        }
+      ],
+      "seconds": 0.068351
+    },
+    {
+      "test": "tests.module1.test_a_rubric.RubricCases.test_a016_weighted_coverage_drives_base_score",
+      "case_id": "A-016",
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.040234
+    },
+    {
+      "test": "tests.module1.test_a_rubric.RubricCases.test_a017_pass_threshold_uses_displayed_score",
+      "case_id": "A-017",
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.048835
+    },
+    {
+      "test": "tests.module1.test_a_rubric.RubricCases.test_a018_ai_weight_and_failure_fallback",
+      "case_id": "A-018",
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.051299
+    },
+    {
+      "test": "tests.module1.test_a_similarity.SimilarityCases.test_a007_nfkc_case_and_punctuation_normalization",
+      "case_id": "A-007",
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.037818
+    },
+    {
+      "test": "tests.module1.test_a_similarity.SimilarityCases.test_a008_dice_uses_character_multiplicity",
+      "case_id": "A-008",
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.040001
+    },
+    {
+      "test": "tests.module1.test_a_similarity.SimilarityCases.test_a009_character_order_does_not_change_lexical_score",
+      "case_id": "A-009",
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.04152
+    },
+    {
+      "test": "tests.module1.test_a_similarity.SimilarityCases.test_a010_negation_is_documented_lexical_limit",
+      "case_id": "A-010",
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.049407
+    },
+    {
+      "test": "tests.module1.test_a_similarity.SimilarityCases.test_a011_punctuation_only_answer_is_rejected",
+      "case_id": "A-011",
+      "status": "passed",
+      "subtests": [
+        {
+          "parameters": "_OrderedChainMap({'field': 'workContent'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'answerContent'})",
+          "status": "passed"
+        }
+      ],
+      "seconds": 0.04109
+    },
+    {
+      "test": "tests.module1.test_a_similarity.SimilarityCases.test_a012_result_contains_score_and_text_difference",
+      "case_id": "A-012",
+      "status": "passed",
+      "subtests": [],
+      "seconds": 0.035173
+    },
+    {
+      "test": "tests.module1.test_a_validation.ValidationCases.test_a001_missing_or_blank_answer_fields",
+      "case_id": "A-001",
+      "status": "passed",
+      "subtests": [
+        {
+          "parameters": "_OrderedChainMap({'field': 'workContent', 'value': 'None'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'workContent', 'value': \"''\"})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'workContent', 'value': \"' \\\\t\\\\n'\"})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'answerContent', 'value': 'None'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'answerContent', 'value': \"''\"})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'answerContent', 'value': \"' \\\\t\\\\n'\"})",
+          "status": "passed"
+        }
+      ],
+      "seconds": 0.057882
+    },
+    {
+      "test": "tests.module1.test_a_validation.ValidationCases.test_a002_text_at_5000_character_boundary",
+      "case_id": "A-002",
+      "status": "passed",
+      "subtests": [
+        {
+          "parameters": "_OrderedChainMap({'field': 'workContent'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'answerContent'})",
+          "status": "passed"
+        }
+      ],
+      "seconds": 0.053427
+    },
+    {
+      "test": "tests.module1.test_a_validation.ValidationCases.test_a003_text_over_5000_character_boundary",
+      "case_id": "A-003",
+      "status": "passed",
+      "subtests": [
+        {
+          "parameters": "_OrderedChainMap({'field': 'workContent'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'answerContent'})",
+          "status": "passed"
+        }
+      ],
+      "seconds": 0.038603
+    },
+    {
+      "test": "tests.module1.test_a_validation.ValidationCases.test_a004_max_score_boundaries",
+      "case_id": "A-004",
+      "status": "passed",
+      "subtests": [
+        {
+          "parameters": "_OrderedChainMap({'valid': 1})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'valid': 1000})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'invalid': 0})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'invalid': -1})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'invalid': 1001})",
+          "status": "passed"
+        }
+      ],
+      "seconds": 0.066367
+    },
+    {
+      "test": "tests.module1.test_a_validation.ValidationCases.test_a005_percent_boundaries",
+      "case_id": "A-005",
+      "status": "passed",
+      "subtests": [
+        {
+          "parameters": "_OrderedChainMap({'field': 'passPercent', 'valid': 0})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'passPercent', 'valid': 100})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'passPercent', 'invalid': -0.01})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'passPercent', 'invalid': 100.01})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'aiWeight', 'valid': 0})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'aiWeight', 'valid': 100})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'aiWeight', 'invalid': -0.01})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'field': 'aiWeight', 'invalid': 100.01})",
+          "status": "passed"
+        }
+      ],
+      "seconds": 0.096515
+    },
+    {
+      "test": "tests.module1.test_a_validation.ValidationCases.test_a006_non_numeric_or_non_finite_scores",
+      "case_id": "A-006",
+      "status": "passed",
+      "subtests": [
+        {
+          "parameters": "_OrderedChainMap({'value': 'True'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'value': 'False'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'value': \"'100'\"})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'value': 'None'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'value': 'nan'})",
+          "status": "passed"
+        },
+        {
+          "parameters": "_OrderedChainMap({'value': 'inf'})",
+          "status": "passed"
+        }
+      ],
+      "seconds": 0.062945
+    }
+  ]
+}

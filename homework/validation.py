@@ -1,4 +1,5 @@
 import math
+from .normalization import normalize
 
 
 class ValidationError(ValueError):
@@ -19,7 +20,9 @@ def text(value, label, limit=5000, required=True):
 def number(value, label, low, high):
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValidationError(f'{label}必须是数字。')
-    if not math.isfinite(value) or not low <= value <= high:
+    # Check the bounded interval first: isfinite() converts integers to float
+    # and raises OverflowError for arbitrarily large JSON integers.
+    if not low <= value <= high or not math.isfinite(value):
         raise ValidationError(f'{label}须在 {low}～{high} 之间。')
     return float(value)
 
@@ -48,6 +51,6 @@ def rubric(value):
             raise ValidationError('评分要点格式错误。')
         result.append({'keyword': text(item.get('keyword'), '要点关键词', 80),
                        'weight': number(item.get('weight', 1), '要点权重', 0.1, 100)})
-    if len({r['keyword'].casefold() for r in result}) != len(result):
+    if len({normalize(r['keyword']) for r in result}) != len(result):
         raise ValidationError('评分要点关键词不能重复。')
     return result

@@ -1,0 +1,23 @@
+test_a013_rubric_count_boundaries (tests.module1.test_a_rubric.RubricCases.test_a013_rubric_count_boundaries) ... ok
+test_a014_keyword_length_boundaries (tests.module1.test_a_rubric.RubricCases.test_a014_keyword_length_boundaries) ... ok
+test_a015_keyword_weight_boundaries (tests.module1.test_a_rubric.RubricCases.test_a015_keyword_weight_boundaries) ... ok
+test_a016_weighted_coverage_drives_base_score (tests.module1.test_a_rubric.RubricCases.test_a016_weighted_coverage_drives_base_score) ... ok
+test_a017_pass_threshold_uses_displayed_score (tests.module1.test_a_rubric.RubricCases.test_a017_pass_threshold_uses_displayed_score) ... ok
+test_a018_ai_weight_and_failure_fallback (tests.module1.test_a_rubric.RubricCases.test_a018_ai_weight_and_failure_fallback) ... ok
+test_a007_nfkc_case_and_punctuation_normalization (tests.module1.test_a_similarity.SimilarityCases.test_a007_nfkc_case_and_punctuation_normalization) ... ok
+test_a008_dice_uses_character_multiplicity (tests.module1.test_a_similarity.SimilarityCases.test_a008_dice_uses_character_multiplicity) ... ok
+test_a009_character_order_does_not_change_lexical_score (tests.module1.test_a_similarity.SimilarityCases.test_a009_character_order_does_not_change_lexical_score) ... ok
+test_a010_negation_is_documented_lexical_limit (tests.module1.test_a_similarity.SimilarityCases.test_a010_negation_is_documented_lexical_limit) ... ok
+test_a011_punctuation_only_answer_is_rejected (tests.module1.test_a_similarity.SimilarityCases.test_a011_punctuation_only_answer_is_rejected) ... ok
+test_a012_result_contains_score_and_text_difference (tests.module1.test_a_similarity.SimilarityCases.test_a012_result_contains_score_and_text_difference) ... ok
+test_a001_missing_or_blank_answer_fields (tests.module1.test_a_validation.ValidationCases.test_a001_missing_or_blank_answer_fields) ... ok
+test_a002_text_at_5000_character_boundary (tests.module1.test_a_validation.ValidationCases.test_a002_text_at_5000_character_boundary) ... ok
+test_a003_text_over_5000_character_boundary (tests.module1.test_a_validation.ValidationCases.test_a003_text_over_5000_character_boundary) ... ok
+test_a004_max_score_boundaries (tests.module1.test_a_validation.ValidationCases.test_a004_max_score_boundaries) ... ok
+test_a005_percent_boundaries (tests.module1.test_a_validation.ValidationCases.test_a005_percent_boundaries) ... ok
+test_a006_non_numeric_or_non_finite_scores (tests.module1.test_a_validation.ValidationCases.test_a006_non_numeric_or_non_finite_scores) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 1.038s
+
+OK

@@ -1,0 +1,73 @@
+test_a019_giant_numeric_input_is_validation_error (tests.module1.test_a_defects.DefectCases.test_a019_giant_numeric_input_is_validation_error)
+A bounded numeric setting should reject even an unconvertible integer. ... FAIL
+test_a020_normalized_duplicate_rubric_is_rejected (tests.module1.test_a_defects.DefectCases.test_a020_normalized_duplicate_rubric_is_rejected)
+Keywords that match the same normalized content should be one keyword. ... FAIL
+test_a021_invalid_model_probability_cannot_be_hidden_by_rubric (tests.module1.test_a_defects.DefectCases.test_a021_invalid_model_probability_cannot_be_hidden_by_rubric)
+Validate the model's probability before mixing with a rubric. ... FAIL
+test_a022_giant_ai_response_keeps_local_score (tests.module1.test_a_defects.DefectCases.test_a022_giant_ai_response_keeps_local_score)
+An invalid cloud response should trigger the documented local fallback. ... FAIL
+test_a013_rubric_count_boundaries (tests.module1.test_a_rubric.RubricCases.test_a013_rubric_count_boundaries) ... ok
+test_a014_keyword_length_boundaries (tests.module1.test_a_rubric.RubricCases.test_a014_keyword_length_boundaries) ... ok
+test_a015_keyword_weight_boundaries (tests.module1.test_a_rubric.RubricCases.test_a015_keyword_weight_boundaries) ... ok
+test_a016_weighted_coverage_drives_base_score (tests.module1.test_a_rubric.RubricCases.test_a016_weighted_coverage_drives_base_score) ... ok
+test_a017_pass_threshold_uses_displayed_score (tests.module1.test_a_rubric.RubricCases.test_a017_pass_threshold_uses_displayed_score) ... ok
+test_a018_ai_weight_and_failure_fallback (tests.module1.test_a_rubric.RubricCases.test_a018_ai_weight_and_failure_fallback) ... ok
+test_a007_nfkc_case_and_punctuation_normalization (tests.module1.test_a_similarity.SimilarityCases.test_a007_nfkc_case_and_punctuation_normalization) ... ok
+test_a008_dice_uses_character_multiplicity (tests.module1.test_a_similarity.SimilarityCases.test_a008_dice_uses_character_multiplicity) ... ok
+test_a009_character_order_does_not_change_lexical_score (tests.module1.test_a_similarity.SimilarityCases.test_a009_character_order_does_not_change_lexical_score) ... ok
+test_a010_negation_is_documented_lexical_limit (tests.module1.test_a_similarity.SimilarityCases.test_a010_negation_is_documented_lexical_limit) ... ok
+test_a011_punctuation_only_answer_is_rejected (tests.module1.test_a_similarity.SimilarityCases.test_a011_punctuation_only_answer_is_rejected) ... ok
+test_a012_result_contains_score_and_text_difference (tests.module1.test_a_similarity.SimilarityCases.test_a012_result_contains_score_and_text_difference) ... ok
+test_a001_missing_or_blank_answer_fields (tests.module1.test_a_validation.ValidationCases.test_a001_missing_or_blank_answer_fields) ... ok
+test_a002_text_at_5000_character_boundary (tests.module1.test_a_validation.ValidationCases.test_a002_text_at_5000_character_boundary) ... ok
+test_a003_text_over_5000_character_boundary (tests.module1.test_a_validation.ValidationCases.test_a003_text_over_5000_character_boundary) ... ok
+test_a004_max_score_boundaries (tests.module1.test_a_validation.ValidationCases.test_a004_max_score_boundaries) ... ok
+test_a005_percent_boundaries (tests.module1.test_a_validation.ValidationCases.test_a005_percent_boundaries) ... ok
+test_a006_non_numeric_or_non_finite_scores (tests.module1.test_a_validation.ValidationCases.test_a006_non_numeric_or_non_finite_scores) ... ok
+
+======================================================================
+FAIL: test_a019_giant_numeric_input_is_validation_error (tests.module1.test_a_defects.DefectCases.test_a019_giant_numeric_input_is_validation_error)
+A bounded numeric setting should reject even an unconvertible integer.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Bocchi\Codes\Code_VSCode\Grade-your-homework-original\tests\module1\test_a_defects.py", line 16, in test_a019_giant_numeric_input_is_validation_error
+    self.assert_rejected_without_record(maxScore=10 ** 400)
+  File "E:\Bocchi\Codes\Code_VSCode\Grade-your-homework-original\tests\module1\support.py", line 30, in assert_rejected_without_record
+    self.assertEqual(response.status_code, expected, response.json)
+AssertionError: 500 != 400 : {'message': '服务暂时无法完成请求，请稍后重试。'}
+
+======================================================================
+FAIL: test_a020_normalized_duplicate_rubric_is_rejected (tests.module1.test_a_defects.DefectCases.test_a020_normalized_duplicate_rubric_is_rejected)
+Keywords that match the same normalized content should be one keyword.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Bocchi\Codes\Code_VSCode\Grade-your-homework-original\tests\module1\test_a_defects.py", line 20, in test_a020_normalized_duplicate_rubric_is_rejected
+    self.assert_rejected_without_record(workContent='A', answerContent='AB',
+  File "E:\Bocchi\Codes\Code_VSCode\Grade-your-homework-original\tests\module1\support.py", line 30, in assert_rejected_without_record
+    self.assertEqual(response.status_code, expected, response.json)
+AssertionError: 200 != 400 : {'aiPercent': None, 'answerContent': 'AB', 'basePercent': 66.67, 'createdAt': '2026-09-14T23:28:33.677627+00:00', 'diff': [{'answer': 'A', 'reference': 'A', 'type': 'equal'}, {'answer': '', 'reference': 'B', 'type': 'delete'}], 'explanation': '文本基线按规范化字符重合度计算；不能判断语义正误，请人工复核。 已启用要点：基础相似度占 40%，加权关键词覆盖占 60%。', 'id': 'd6af61f6ef1f4b72a11d63da477438e2', 'options': {'aiWeight': 70.0, 'engine': 'lexical', 'maxScore': 100.0, 'passPercent': 60.0, 'useDeepseek': False}, 'passed': True, 'rubric': [{'keyword': 'A', 'matched': True, 'weight': 1.0}, {'keyword': 'Ａ', 'matched': True, 'weight': 1.0}, {'keyword': 'Z', 'matched': False, 'weight': 1.0}], 'score': 66.67, 'similarity': 66.67, 'studentName': '测试学生A', 'title': '模块一验证', 'warnings': [], 'workContent': 'A'}
+
+======================================================================
+FAIL: test_a021_invalid_model_probability_cannot_be_hidden_by_rubric (tests.module1.test_a_defects.DefectCases.test_a021_invalid_model_probability_cannot_be_hidden_by_rubric)
+Validate the model's probability before mixing with a rubric.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Bocchi\Codes\Code_VSCode\Grade-your-homework-original\tests\module1\test_a_defects.py", line 30, in test_a021_invalid_model_probability_cannot_be_hidden_by_rubric
+    self.assert_rejected_without_record(expected=503, engine='transformer',
+  File "E:\Bocchi\Codes\Code_VSCode\Grade-your-homework-original\tests\module1\support.py", line 30, in assert_rejected_without_record
+    self.assertEqual(response.status_code, expected, response.json)
+AssertionError: 200 != 503 : {'aiPercent': None, 'answerContent': 'AB', 'basePercent': 80.0, 'createdAt': '2026-09-14T23:28:33.760812+00:00', 'diff': [{'answer': 'A', 'reference': 'A', 'type': 'equal'}, {'answer': '', 'reference': 'B', 'type': 'delete'}], 'explanation': '实验 Transformer 返回文本匹配概率；原有权重尚未通过教学评分标定，不能作为正式成绩。 已启用要点：基础相似度占 40%，加权关键词覆盖占 60%。', 'id': '073fb56da02a4522a76c7e5f471272eb', 'options': {'aiWeight': 70.0, 'engine': 'transformer', 'maxScore': 100.0, 'passPercent': 60.0, 'useDeepseek': False}, 'passed': True, 'rubric': [{'keyword': 'Z', 'matched': False, 'weight': 1.0}], 'score': 80.0, 'similarity': 80.0, 'studentName': '测试学生A', 'title': '模块一验证', 'warnings': [], 'workContent': 'A'}
+
+======================================================================
+FAIL: test_a022_giant_ai_response_keeps_local_score (tests.module1.test_a_defects.DefectCases.test_a022_giant_ai_response_keeps_local_score)
+An invalid cloud response should trigger the documented local fallback.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Bocchi\Codes\Code_VSCode\Grade-your-homework-original\tests\module1\test_a_defects.py", line 42, in test_a022_giant_ai_response_keeps_local_score
+    self.assertEqual(response.status_code, 200, response.json)
+AssertionError: 500 != 200 : {'message': '服务暂时无法完成请求，请稍后重试。'}
+
+----------------------------------------------------------------------
+Ran 22 tests in 1.322s
+
+FAILED (failures=4)

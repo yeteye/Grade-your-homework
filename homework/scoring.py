@@ -1,19 +1,14 @@
 """Deterministic scoring and optional model orchestration, independent of Flask."""
 import threading
-import unicodedata
 from collections import Counter
 from difflib import SequenceMatcher
 from math import isfinite
 
 from .ai_grader import get_points, GradingUnavailable
+from .normalization import normalize
 from .validation import text, options, rubric, ValidationError
 
 _model_lock = threading.Lock()
-
-
-def normalize(value):
-    value = unicodedata.normalize('NFKC', value).casefold()
-    return ''.join(c for c in value if c.isalnum())
 
 
 def lexical_similarity(answer, reference):
@@ -44,12 +39,14 @@ def compare(data, defaults):
             with _model_lock:
                 from .models.transformer import calculate_similarity
                 base = float(calculate_similarity(work, answer))
-        except (ImportError, OSError, RuntimeError, ValueError) as exc:
+        except (ImportError, OSError, RuntimeError, ValueError, OverflowError) as exc:
             raise GradingUnavailable('本地模型不可用，请检查依赖与权重，或切换文本基线。') from exc
         explanation = '实验 Transformer 返回文本匹配概率；原有权重尚未通过教学评分标定，不能作为正式成绩。'
     else:
         base = lexical_similarity(work, answer)
         explanation = '文本基线按规范化字符重合度计算；不能判断语义正误，请人工复核。'
+    if not isfinite(base) or not 0 <= base <= 1:
+        raise GradingUnavailable('评分引擎返回无效分数，未保存批改记录。')
     if points:
         coverage = sum(p['weight'] for p in matches if p['matched']) / sum(p['weight'] for p in matches)
         base = 0.4 * base + 0.6 * coverage
