@@ -1,6 +1,7 @@
 """模块一课程自动化测试：业务规则、接口、持久化与安全回归。"""
 import io
 import json
+import os
 import sys
 import tempfile
 import types
@@ -57,14 +58,19 @@ class ModuleOneValidationTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValidationError):
                 number(value, "满分", 1, 1000)
 
-    def test_m1_ut_007_number_rejects_boolean(self):
-        with self.assertRaises(ValidationError):
-            number(True, "满分", 1, 1000)
+    def test_m1_ut_007_number_rejects_non_numeric_and_non_finite_values(self):
+        for value in (True, False, "100", None, float("nan"), float("inf")):
+            with self.subTest(value=repr(value)), self.assertRaises(ValidationError):
+                number(value, "满分", 1, 1000)
 
     def test_m1_ut_008_options_accept_valid_boundaries(self):
         value = options({"engine": "lexical", "maxScore": 1, "passPercent": 0,
                          "aiWeight": 100, "useDeepseek": False})
         self.assertEqual((value["maxScore"], value["passPercent"], value["aiWeight"]), (1, 0, 100))
+        for field in ("passPercent", "aiWeight"):
+            for invalid in (-0.01, 100.01):
+                with self.subTest(field=field, invalid=invalid), self.assertRaises(ValidationError):
+                    options({field: invalid})
 
     def test_m1_ut_009_options_reject_unknown_engine(self):
         with self.assertRaises(ValidationError):
@@ -140,6 +146,55 @@ class ModuleOneScoringTests(unittest.TestCase):
             compare(self.payload(workContent="甲" * 255, answerContent="乙" * 255,
                                  engine="transformer"), DEFAULTS)
 
+    def test_m1_ut_040_dice_counts_repeated_characters(self):
+        self.assertAlmostEqual(lexical_similarity("aab", "abb"), 2 / 3)
+
+    def test_m1_ut_041_character_order_does_not_change_lexical_score(self):
+        result = compare(self.payload(workContent="测试软件", answerContent="软件测试"), DEFAULTS)
+        self.assertEqual(result["score"], 100)
+        self.assertIn("不能判断语义", result["explanation"])
+
+    def test_m1_ut_042_negation_requires_manual_review(self):
+        result = compare(self.payload(workContent="我不喜欢", answerContent="我喜欢"), DEFAULTS)
+        self.assertEqual(result["similarity"], round(100 * 6 / 7, 2))
+        self.assertIn("人工复核", result["explanation"])
+
+    def test_m1_ut_043_punctuation_only_answer_is_rejected(self):
+        for field in ("workContent", "answerContent"):
+            with self.subTest(field=field), self.assertRaises(ValidationError):
+                compare(self.payload(**{field: "！？。"}), DEFAULTS)
+
+    def test_m1_ut_044_partial_match_returns_score_and_diff(self):
+        result = compare(self.payload(workContent="A", answerContent="AB"), DEFAULTS)
+        self.assertEqual(result["score"], 66.67)
+        self.assertEqual(result["basePercent"], 66.67)
+        self.assertTrue(any(part["type"] != "equal" for part in result["diff"]))
+
+    def test_m1_ut_045_rubric_keyword_length_boundaries(self):
+        self.assertEqual(len(compare(self.payload(rubric=[{"keyword": "词" * 80, "weight": 1}]), DEFAULTS)["rubric"]), 1)
+        with self.assertRaises(ValidationError):
+            compare(self.payload(rubric=[{"keyword": "词" * 81, "weight": 1}]), DEFAULTS)
+
+    def test_m1_ut_046_rubric_weight_boundaries(self):
+        for value in (0.1, 100):
+            with self.subTest(valid=value):
+                compare(self.payload(rubric=[{"keyword": "软件", "weight": value}]), DEFAULTS)
+        for value in (0, 0.09, 100.01, True):
+            with self.subTest(invalid=value), self.assertRaises(ValidationError):
+                compare(self.payload(rubric=[{"keyword": "软件", "weight": value}]), DEFAULTS)
+
+    def test_m1_ut_047_uneven_rubric_weights_drive_score(self):
+        result = compare(self.payload(workContent="甲", answerContent="甲乙", rubric=[
+            {"keyword": "甲", "weight": 3}, {"keyword": "乙", "weight": 1}]), DEFAULTS)
+        self.assertEqual(result["basePercent"], 71.67)
+        self.assertEqual(result["score"], 71.67)
+
+    def test_m1_ut_048_displayed_score_controls_fractional_threshold(self):
+        accepted = compare(self.payload(workContent="A", answerContent="AB", passPercent=66.67), DEFAULTS)
+        rejected = compare(self.payload(workContent="A", answerContent="AB", passPercent=66.68), DEFAULTS)
+        self.assertTrue(accepted["passed"])
+        self.assertFalse(rejected["passed"])
+
 
 class ModuleOneApiTests(unittest.TestCase):
     def setUp(self):
@@ -150,6 +205,11 @@ class ModuleOneApiTests(unittest.TestCase):
 
     def tearDown(self):
         self.folder.cleanup()
+
+    def assert_rejected_without_record(self, expected=400, **changes):
+        response = self.client.post("/compare_texts", json={**self.payload, **changes})
+        self.assertEqual(response.status_code, expected, response.get_json())
+        self.assertEqual(self.client.get("/api/stats").get_json()["total"], 0)
 
     def test_m1_it_023_compare_persists_record(self):
         created = self.client.post("/compare_texts", json=self.payload)
@@ -245,6 +305,40 @@ class ModuleOneApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(observed, [(255, 0, 0), (0, 0, 255)])
         self.assertEqual(list((Path(self.folder.name) / "temp").iterdir()), [])
+
+    def test_m1_it_049_giant_numeric_input_is_validation_error(self):
+        self.assert_rejected_without_record(maxScore=10 ** 400)
+
+    def test_m1_it_050_normalized_duplicate_rubric_is_rejected(self):
+        self.assert_rejected_without_record(workContent="A", answerContent="AB", rubric=[
+            {"keyword": "A", "weight": 1},
+            {"keyword": "Ａ", "weight": 1},
+            {"keyword": "Z", "weight": 1},
+        ])
+
+    def test_m1_it_051_invalid_transformer_probability_is_rejected(self):
+        fake = types.ModuleType("homework.models.transformer")
+        with patch.dict(sys.modules, {"homework.models.transformer": fake}):
+            for value in (-0.1, 2.0, float("nan"), float("inf")):
+                with self.subTest(model_output=repr(value)):
+                    fake.calculate_similarity = lambda _work, _answer, output=value: output
+                    response = self.client.post("/compare_texts", json={**self.payload,
+                        "engine": "transformer", "workContent": "A", "answerContent": "AB",
+                        "rubric": [{"keyword": "Z", "weight": 1}]})
+                    self.assertEqual(response.status_code, 503, response.get_json())
+        self.assertEqual(self.client.get("/api/stats").get_json()["total"], 0)
+
+    def test_m1_it_052_giant_ai_response_keeps_local_score(self):
+        cloud_content = json.dumps({"score": 10 ** 400})
+        response_body = json.dumps({"choices": [{"message": {"content": cloud_content}}]})
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-only"}), \
+                patch("urllib.request.urlopen", return_value=io.BytesIO(response_body.encode("utf-8"))):
+            response = self.client.post("/compare_texts", json={**self.payload,
+                "workContent": "A", "answerContent": "AB", "useDeepseek": True, "aiWeight": 70})
+        self.assertEqual(response.status_code, 200, response.get_json())
+        self.assertEqual(response.get_json()["score"], 66.67)
+        self.assertIsNone(response.get_json()["aiPercent"])
+        self.assertTrue(response.get_json()["warnings"])
 
 
 class ModuleOneImageTests(unittest.TestCase):

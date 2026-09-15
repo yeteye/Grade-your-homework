@@ -34,15 +34,20 @@ class ValidationTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValidationError):
                 number(value, "满分", 1, 1000)
 
-    def test_m1_ut_007_number_rejects_boolean(self):
-        with self.assertRaises(ValidationError):
-            number(True, "满分", 1, 1000)
+    def test_m1_ut_007_number_rejects_non_numeric_and_non_finite_values(self):
+        for value in (True, False, "100", None, float("nan"), float("inf")):
+            with self.subTest(value=repr(value)), self.assertRaises(ValidationError):
+                number(value, "满分", 1, 1000)
 
     def test_m1_ut_008_options_accept_valid_boundaries(self):
         value = options({"engine": "lexical", "maxScore": 1, "passPercent": 0,
                          "aiWeight": 100, "useDeepseek": False})
         self.assertEqual((value["maxScore"], value["passPercent"], value["aiWeight"]),
                          (1, 0, 100))
+        for field in ("passPercent", "aiWeight"):
+            for invalid in (-0.01, 100.01):
+                with self.subTest(field=field, invalid=invalid), self.assertRaises(ValidationError):
+                    options({field: invalid})
 
     def test_m1_ut_009_options_reject_unknown_engine(self):
         with self.assertRaises(ValidationError):

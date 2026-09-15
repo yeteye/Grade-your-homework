@@ -1,8 +1,13 @@
-"""模块一批改、批量、设置、模板与记录接口测试（M1-IT-023～030）。"""
+"""模块一批改、批量、设置、模板、记录与缺陷回归接口测试。"""
+import io
+import json
+import os
 import sys
 import tempfile
+import types
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
@@ -75,6 +80,45 @@ class BusinessApiTests(unittest.TestCase):
         self.assertEqual(self.client.get("/api/records?q=不存在").get_json()["total"], 0)
         self.assertEqual(self.client.get("/api/records?status=passed").get_json()["total"], 1)
         self.assertEqual(self.client.get("/api/records?page=0").status_code, 400)
+
+    def assert_rejected_without_record(self, expected=400, **changes):
+        response = self.client.post("/compare_texts", json={**self.payload, **changes})
+        self.assertEqual(response.status_code, expected, response.get_json())
+        self.assertEqual(self.client.get("/api/stats").get_json()["total"], 0)
+
+    def test_m1_it_049_giant_numeric_input_is_validation_error(self):
+        self.assert_rejected_without_record(maxScore=10 ** 400)
+
+    def test_m1_it_050_normalized_duplicate_rubric_is_rejected(self):
+        self.assert_rejected_without_record(workContent="A", answerContent="AB", rubric=[
+            {"keyword": "A", "weight": 1},
+            {"keyword": "Ａ", "weight": 1},
+            {"keyword": "Z", "weight": 1},
+        ])
+
+    def test_m1_it_051_invalid_transformer_probability_is_rejected(self):
+        fake = types.ModuleType("homework.models.transformer")
+        with patch.dict(sys.modules, {"homework.models.transformer": fake}):
+            for value in (-0.1, 2.0, float("nan"), float("inf")):
+                with self.subTest(model_output=repr(value)):
+                    fake.calculate_similarity = lambda _work, _answer, output=value: output
+                    response = self.client.post("/compare_texts", json={**self.payload,
+                        "engine": "transformer", "workContent": "A", "answerContent": "AB",
+                        "rubric": [{"keyword": "Z", "weight": 1}]})
+                    self.assertEqual(response.status_code, 503, response.get_json())
+        self.assertEqual(self.client.get("/api/stats").get_json()["total"], 0)
+
+    def test_m1_it_052_giant_ai_response_keeps_local_score(self):
+        cloud_content = json.dumps({"score": 10 ** 400})
+        response_body = json.dumps({"choices": [{"message": {"content": cloud_content}}]})
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-only"}), \
+                patch("urllib.request.urlopen", return_value=io.BytesIO(response_body.encode("utf-8"))):
+            response = self.client.post("/compare_texts", json={**self.payload,
+                "workContent": "A", "answerContent": "AB", "useDeepseek": True, "aiWeight": 70})
+        self.assertEqual(response.status_code, 200, response.get_json())
+        self.assertEqual(response.get_json()["score"], 66.67)
+        self.assertIsNone(response.get_json()["aiPercent"])
+        self.assertTrue(response.get_json()["warnings"])
 
 
 if __name__ == "__main__":
