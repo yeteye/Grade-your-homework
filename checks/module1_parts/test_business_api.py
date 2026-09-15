@@ -26,18 +26,18 @@ class BusinessApiTests(unittest.TestCase):
     def tearDown(self):
         self.folder.cleanup()
 
-    def test_m1_it_023_compare_persists_record(self):
+    def test_m1_it_036_compare_persists_record(self):
         created = self.client.post("/compare_texts", json=self.payload)
         self.assertEqual(created.status_code, 200)
         record = self.client.get("/api/records/" + created.get_json()["id"])
         self.assertEqual(record.get_json()["workContent"], self.payload["workContent"])
 
-    def test_m1_it_024_invalid_compare_does_not_persist(self):
+    def test_m1_it_037_invalid_compare_does_not_persist(self):
         response = self.client.post("/compare_texts", json={**self.payload, "workContent": " "})
         self.assertEqual(response.status_code, 400)
         self.assertEqual(self.client.get("/api/stats").get_json()["total"], 0)
 
-    def test_m1_it_025_batch_accepts_one_and_twenty_items(self):
+    def test_m1_it_038_batch_accepts_one_and_twenty_items(self):
         for count in (1, 20):
             with self.subTest(count=count):
                 data = {**self.payload, "useDeepseek": False,
@@ -47,25 +47,25 @@ class BusinessApiTests(unittest.TestCase):
                 self.assertEqual(response.status_code, 201)
                 self.assertEqual(response.get_json()["count"], count)
 
-    def test_m1_it_026_batch_rejects_zero_and_twenty_one_items(self):
+    def test_m1_it_039_batch_rejects_zero_and_twenty_one_items(self):
         for count in (0, 21):
             with self.subTest(count=count):
                 response = self.client.post("/api/batch", json={**self.payload, "items": [{}] * count})
                 self.assertEqual(response.status_code, 400)
 
-    def test_m1_it_027_batch_failure_is_atomic(self):
+    def test_m1_it_040_batch_failure_is_atomic(self):
         data = {**self.payload, "items": [
             {"studentName": "甲", "workContent": "有效"},
             {"studentName": "乙", "workContent": ""}]}
         self.assertEqual(self.client.post("/api/batch", json=data).status_code, 400)
         self.assertEqual(self.client.get("/api/stats").get_json()["total"], 0)
 
-    def test_m1_it_028_settings_persist_after_restart(self):
+    def test_m1_it_041_settings_persist_after_restart(self):
         self.assertEqual(self.client.put("/api/settings", json={"maxScore": 20}).status_code, 200)
         other = create_app({"TESTING": True, "DATA_DIR": self.folder.name}).test_client()
         self.assertEqual(other.get("/api/settings").get_json()["maxScore"], 20)
 
-    def test_m1_it_029_template_crud(self):
+    def test_m1_it_042_template_crud(self):
         body = {"title": "功能测试", "answerContent": "参考答案", "rubric": []}
         created = self.client.post("/api/templates", json=body)
         identifier = created.get_json()["id"]
@@ -75,7 +75,7 @@ class BusinessApiTests(unittest.TestCase):
         self.assertEqual(updated.status_code, 200)
         self.assertEqual(self.client.delete("/api/templates/" + identifier).status_code, 200)
 
-    def test_m1_it_030_record_filter_and_pagination_validation(self):
+    def test_m1_it_043_record_filter_and_pagination_validation(self):
         self.client.post("/compare_texts", json=self.payload)
         self.assertEqual(self.client.get("/api/records?q=不存在").get_json()["total"], 0)
         self.assertEqual(self.client.get("/api/records?status=passed").get_json()["total"], 1)
@@ -86,17 +86,17 @@ class BusinessApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, expected, response.get_json())
         self.assertEqual(self.client.get("/api/stats").get_json()["total"], 0)
 
-    def test_m1_it_049_giant_numeric_input_is_validation_error(self):
+    def test_m1_it_010_giant_numeric_input_is_validation_error(self):
         self.assert_rejected_without_record(maxScore=10 ** 400)
 
-    def test_m1_it_050_normalized_duplicate_rubric_is_rejected(self):
+    def test_m1_it_018_normalized_duplicate_rubric_is_rejected(self):
         self.assert_rejected_without_record(workContent="A", answerContent="AB", rubric=[
             {"keyword": "A", "weight": 1},
             {"keyword": "Ａ", "weight": 1},
             {"keyword": "Z", "weight": 1},
         ])
 
-    def test_m1_it_051_invalid_transformer_probability_is_rejected(self):
+    def test_m1_it_035_invalid_transformer_probability_is_rejected(self):
         fake = types.ModuleType("homework.models.transformer")
         with patch.dict(sys.modules, {"homework.models.transformer": fake}):
             for value in (-0.1, 2.0, float("nan"), float("inf")):
@@ -108,7 +108,7 @@ class BusinessApiTests(unittest.TestCase):
                     self.assertEqual(response.status_code, 503, response.get_json())
         self.assertEqual(self.client.get("/api/stats").get_json()["total"], 0)
 
-    def test_m1_it_052_giant_ai_response_keeps_local_score(self):
+    def test_m1_it_032_giant_ai_response_keeps_local_score(self):
         cloud_content = json.dumps({"score": 10 ** 400})
         response_body = json.dumps({"choices": [{"message": {"content": cloud_content}}]})
         with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-only"}), \
