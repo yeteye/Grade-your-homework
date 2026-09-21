@@ -185,6 +185,16 @@ instance/                    本机数据库、临时文件与工具输出（不
 
 需要分批运行时，可分别执行 `checks/module1_parts/test_validation.py`、`test_scoring.py`、`test_business_api.py`、`test_ocr_security.py` 和 `test_image_preprocessing.py`。这些脚本不包含成员姓名；完整入口仍为 `checks/test_module1.py`。
 
+### 模块二 AI 辅助测试
+
+双击 `run-module2-tests.bat` 可一键执行模块二新增的 20 条接口自动化用例；也可以运行：
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest checks.test_module2 -v
+```
+
+新增用例覆盖服务状态与演示资源、记录详情和删除、分页稳定性、统计区间、单份 JSON/CSV 导出、HTTP 错误契约及协议感知的同源保护。分批验证脚本位于 `checks/module2_parts/`，文件名分别为 `service_contract.py`、`record_lifecycle.py`、`analytics_exports.py` 和 `security_protocol.py`。这些用例不重复计入模块一的 52 条测试。
+
 本版本默认只监听 `127.0.0.1`，供本机演示和使用，没有多用户身份认证。数据库路径可通过 `HOMEWORK_DATA_DIR` 指定；备份时先停止服务，再复制整个 `instance/` 目录。CSV 导出不是完整数据库备份。上传图片识别后不保留，识别文字与批改记录会保留到主动删除。
 
 ## HTTP 接口
