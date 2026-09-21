@@ -38,8 +38,22 @@ def create_app(config=None):
     def same_origin():
         if request.method in ('POST', 'PUT', 'DELETE', 'PATCH'):
             origin = request.headers.get('Origin')
-            if origin and urlsplit(origin).netloc != request.host:
-                return jsonify(message='不允许跨站修改数据。'), 403
+            if origin:
+                def normalized_origin(value):
+                    parsed = urlsplit(value)
+                    if not parsed.scheme or not parsed.hostname:
+                        return None
+                    try:
+                        port = parsed.port
+                    except ValueError:
+                        return None
+                    scheme = parsed.scheme.lower()
+                    if port is None:
+                        port = 443 if scheme == 'https' else 80 if scheme == 'http' else None
+                    return scheme, parsed.hostname.lower(), port
+
+                if normalized_origin(origin) != normalized_origin(request.host_url):
+                    return jsonify(message='不允许跨站修改数据。'), 403
 
     @app.after_request
     def headers(response):
