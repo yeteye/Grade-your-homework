@@ -28,3 +28,25 @@ class AnalyticsExportTests(ApiCase):
         body = self.client.get("/api/stats").get_json()
         self.assertEqual((body["average"], body["passRate"], body["templates"]), (75.0, 50.0, 1))
 
+    def test_m2_it_015_individual_json_export_preserves_unicode(self):
+        created = self.create_record(studentName="张三")
+        response = self.client.get(f"/api/records/{created['id']}/export?format=json")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("attachment", response.headers["Content-Disposition"])
+        self.assertEqual(response.get_json()["studentName"], "张三")
+
+    def test_m2_it_016_individual_csv_export_has_bom_header_and_one_row(self):
+        created = self.create_record(studentName="李四")
+        response = self.client.get(f"/api/records/{created['id']}/export?format=csv")
+        text = response.data.decode("utf-8-sig")
+        rows = list(csv.reader(io.StringIO(text)))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(rows[0][0], "记录编号")
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[1][2], "李四")
+
+    def test_m2_it_017_unsupported_individual_export_format_is_rejected(self):
+        created = self.create_record()
+        response = self.client.get(f"/api/records/{created['id']}/export?format=xml")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("JSON 或 CSV", response.get_json()["message"])
